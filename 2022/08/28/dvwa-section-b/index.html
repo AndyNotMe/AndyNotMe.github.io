@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="Weak Session IDs  Low 没什么好说的，每次单机generate，id都会随之增加，每次增加1  High 跟low没啥差，源码上面做了md5加密处理   XSS(DOM)  Low ?default&#x3D;&lt;script&gt;alert(&#39;message!&#39;)&lt;&#x2F;script&gt;  default后面的参数是会直接显示在下拉栏，这点比较重要   High  这里学">
+<meta property="og:type" content="article">
+<meta property="og:title" content="DVWA Lab Section B">
+<meta property="og:url" content="http://example.com/2022/08/28/dvwa-section-b/index.html">
+<meta property="og:site_name" content="a0dy&#39;s Home">
+<meta property="og:description" content="Weak Session IDs  Low 没什么好说的，每次单机generate，id都会随之增加，每次增加1  High 跟low没啥差，源码上面做了md5加密处理   XSS(DOM)  Low ?default&#x3D;&lt;script&gt;alert(&#39;message!&#39;)&lt;&#x2F;script&gt;  default后面的参数是会直接显示在下拉栏，这点比较重要   High  这里学">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2022-08-28T04:00:00.000Z">
+<meta property="article:modified_time" content="2023-03-19T09:40:34.666Z">
+<meta property="article:author" content="Andy">
+<meta property="article:tag" content="Weak Session IDs">
+<meta property="article:tag" content="XSS">
+<meta property="article:tag" content="CSP Bypass">
+<meta property="article:tag" content="JS">
+<meta name="twitter:card" content="summary">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>DVWA Lab Section B</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="Menu"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/search/">Search</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a href="/categories/">categories</a></li><!--
+     --><!--
+       --><li><a href="/links/">Links</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="Previous post" href="/2022/08/30/pwn-start-intro/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="Next post" href="/2022/08/25/dvwa-section-a/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="Back to top" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="Share post" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=http://example.com/2022/08/28/dvwa-section-b/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=http://example.com/2022/08/28/dvwa-section-b/&text=DVWA Lab Section B"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=http://example.com/2022/08/28/dvwa-section-b/&title=DVWA Lab Section B"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=http://example.com/2022/08/28/dvwa-section-b/&is_video=false&description=DVWA Lab Section B"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=DVWA Lab Section B&body=Check out this article: http://example.com/2022/08/28/dvwa-section-b/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=http://example.com/2022/08/28/dvwa-section-b/&title=DVWA Lab Section B"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=http://example.com/2022/08/28/dvwa-section-b/&title=DVWA Lab Section B"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=http://example.com/2022/08/28/dvwa-section-b/&title=DVWA Lab Section B"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=http://example.com/2022/08/28/dvwa-section-b/&title=DVWA Lab Section B"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=http://example.com/2022/08/28/dvwa-section-b/&name=DVWA Lab Section B&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=http://example.com/2022/08/28/dvwa-section-b/&t=DVWA Lab Section B"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#weak-session-ids"><span class="toc-number">1.</span> <span class="toc-text"> Weak Session IDs</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#low"><span class="toc-number">1.1.</span> <span class="toc-text"> Low</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#high"><span class="toc-number">1.2.</span> <span class="toc-text"> High</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#xssdom"><span class="toc-number">2.</span> <span class="toc-text"> XSS(DOM)</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#low-2"><span class="toc-number">2.1.</span> <span class="toc-text"> Low</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#high-2"><span class="toc-number">2.2.</span> <span class="toc-text"> High</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#xssreflect"><span class="toc-number">3.</span> <span class="toc-text"> XSS(Reflect)</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#low-3"><span class="toc-number">3.1.</span> <span class="toc-text"> Low</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#high-3"><span class="toc-number">3.2.</span> <span class="toc-text"> High</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#xssstored"><span class="toc-number">4.</span> <span class="toc-text"> XSS(Stored)</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#low-4"><span class="toc-number">4.1.</span> <span class="toc-text"> Low</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#high-4"><span class="toc-number">4.2.</span> <span class="toc-text"> High</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#content-security-policy-bypass"><span class="toc-number">5.</span> <span class="toc-text"> Content Security Policy Bypass</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#low-5"><span class="toc-number">5.1.</span> <span class="toc-text"> Low</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#high-5"><span class="toc-number">5.2.</span> <span class="toc-text"> High</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#javascript"><span class="toc-number">6.</span> <span class="toc-text"> JavaScript</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#low-6"><span class="toc-number">6.1.</span> <span class="toc-text"> Low</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#high-6"><span class="toc-number">6.2.</span> <span class="toc-text"> High</span></a></li></ol></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        DVWA Lab Section B
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">Andy</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2022-08-28T04:00:00.000Z" itemprop="datePublished">2022-08-28</time>
+        
+      
+    </div>
+
+
+      
+    <div class="article-category">
+        <i class="fas fa-archive"></i>
+        <a class="category-link" href="/categories/DVWA/">DVWA</a>
+    </div>
+
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link-link" href="/tags/CSP-Bypass/" rel="tag">CSP Bypass</a>, <a class="tag-link-link" href="/tags/JS/" rel="tag">JS</a>, <a class="tag-link-link" href="/tags/Weak-Session-IDs/" rel="tag">Weak Session IDs</a>, <a class="tag-link-link" href="/tags/XSS/" rel="tag">XSS</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h2 id="weak-session-ids"><a class="markdownIt-Anchor" href="#weak-session-ids"></a> Weak Session IDs</h2>
+<h3 id="low"><a class="markdownIt-Anchor" href="#low"></a> Low</h3>
+<p>没什么好说的，每次单机generate，id都会随之增加，每次增加1</p>
+<h3 id="high"><a class="markdownIt-Anchor" href="#high"></a> High</h3>
+<p>跟low没啥差，源码上面做了md5加密处理</p>
+<hr />
+<h2 id="xssdom"><a class="markdownIt-Anchor" href="#xssdom"></a> XSS(DOM)</h2>
+<h3 id="low-2"><a class="markdownIt-Anchor" href="#low-2"></a> Low</h3>
+<p><code>?default=&lt;script&gt;alert('message!')&lt;/script&gt;</code></p>
+<blockquote>
+<p>default后面的参数是会直接显示在下拉栏，这点比较重要</p>
+</blockquote>
+<h3 id="high-2"><a class="markdownIt-Anchor" href="#high-2"></a> High</h3>
+<blockquote>
+<p>这里学到了一个新东西就是表单参数后面的值，<code>#</code>后面的都不会被服务器接收，但是用于script用于脚本显示却接受了，这样下拉列表中的内容就被修改了</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">?default=English#%3Cscript%3Ealert(123)%3C/script%3E</span><br></pre></td></tr></table></figure>
+<hr />
+<h2 id="xssreflect"><a class="markdownIt-Anchor" href="#xssreflect"></a> XSS(Reflect)</h2>
+<h3 id="low-3"><a class="markdownIt-Anchor" href="#low-3"></a> Low</h3>
+<p>也是直接<code>&lt;script&gt;function here&lt;/script&gt;</code></p>
+<h3 id="high-3"><a class="markdownIt-Anchor" href="#high-3"></a> High</h3>
+<p>很明显这是一个十分粗糙的过滤，只过滤了script元素，但是有其他的元素也可以加载后同时实现script的效果：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">body</span> <span class="attr">onloaded</span>=<span class="string">&quot;alert(123);&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<hr />
+<h2 id="xssstored"><a class="markdownIt-Anchor" href="#xssstored"></a> XSS(Stored)</h2>
+<h3 id="low-4"><a class="markdownIt-Anchor" href="#low-4"></a> Low</h3>
+<p>脚本直接放框里提交就行了，因为是存储型XSS，数据是直接写入数据库的，所以每次访问都能显示</p>
+<h3 id="high-4"><a class="markdownIt-Anchor" href="#high-4"></a> High</h3>
+<p>这里只有在名字处写入非script标签脚本才能实现XSS Attack，内容处不行，原因是内容出用了一个strip_tags`的</p>
+<hr />
+<h2 id="content-security-policy-bypass"><a class="markdownIt-Anchor" href="#content-security-policy-bypass"></a> Content Security Policy Bypass</h2>
+<p>也是第一次接触到这个漏洞类型介绍，简单记录一下：</p>
+<p>CSP是一个防御攻击的策略，包括了防御XSS和注入攻击。就是添加白名单，允许那些资源能在网站上展示</p>
+<h3 id="low-5"><a class="markdownIt-Anchor" href="#low-5"></a> Low</h3>
+<p>首先<code>F12</code>查看POST请求的请求头中出现了<code>Content-Security-Policy:script-src 'self' https://pastebin.com example.com code.jquery.com https://ssl.google-analytics.com ;</code>,不难看出<code>https://pastebin.com</code>、<code>example.com</code>、<code>code.jquery.com</code>、<code>https://ssl.google-analytics.com</code>在名单里面，然后在pastebin里面可以写入脚本放入输入框，就可以实现XSS，但是不知道为什么我这边还是会被CSP阻止，我是用docker部署的，不知道是不是配置服务器配置出现了错误</p>
+<h3 id="high-5"><a class="markdownIt-Anchor" href="#high-5"></a> High</h3>
+<p>引用了自己域的一个函数，但是我们手动操作这个函数字典中的值达到XSS Attack效果<br />
+查看提示信息可以看到<code>http://192.168.129.129/vulnerabilities/csp/source/jsonp.php?callback=solveSum</code>中的是一段数据<code>solveSum(&#123;&quot;answer&quot;:&quot;15&quot;&#125;)</code>,并且在点击按钮也是执行这一段代码，所以只需要更改呈现在页面的内容即可实现攻击</p>
+<hr />
+<h2 id="javascript"><a class="markdownIt-Anchor" href="#javascript"></a> JavaScript</h2>
+<h3 id="low-6"><a class="markdownIt-Anchor" href="#low-6"></a> Low</h3>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">generate_token</span>(<span class="params"></span>) &#123;</span><br><span class="line">    <span class="keyword">var</span> phrase = <span class="variable language_">document</span>.<span class="title function_">getElementById</span>(<span class="string">&quot;phrase&quot;</span>).<span class="property">value</span>;</span><br><span class="line">    <span class="variable language_">document</span>.<span class="title function_">getElementById</span>(<span class="string">&quot;token&quot;</span>).<span class="property">value</span> = <span class="title function_">md5</span>(<span class="title function_">rot13</span>(phrase));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这是关键代码部分，也是能看的，前面的代码都被加密了。调出控制输入<code>md5(rot13(&quot;success&quot;));</code>发现跟请求表单里面的token不一样，而事实也是页面结果出现了invalid token的结果，所以我们需要手动更改请求表单中的token值。直接burpsuite拦截包就可以反馈正确的结果</p>
+<h3 id="high-6"><a class="markdownIt-Anchor" href="#high-6"></a> High</h3>
+<p>这里用了<code>JS Obfuscate</code>,要转换成给人看的代码就需要<a target="_blank" rel="noopener" href="http://deobfuscatejavascript.com/#">Obfuscate_decode</a>，比较重要的代码：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">do_something</span>(<span class="params">e</span>) &#123;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">var</span> t = <span class="string">&quot;&quot;</span>, n = e.<span class="property">length</span> - <span class="number">1</span>; n &gt;= <span class="number">0</span>; n--) t += e[n];</span><br><span class="line">    <span class="keyword">return</span> t</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">function</span> <span class="title function_">token_part_3</span>(<span class="params">t, y = <span class="string">&quot;ZZ&quot;</span></span>) &#123;</span><br><span class="line">    <span class="variable language_">document</span>.<span class="title function_">getElementById</span>(<span class="string">&quot;token&quot;</span>).<span class="property">value</span> = <span class="title function_">sha256</span>(<span class="variable language_">document</span>.<span class="title function_">getElementById</span>(<span class="string">&quot;token&quot;</span>).<span class="property">value</span> + y)</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">function</span> <span class="title function_">token_part_2</span>(<span class="params">e = <span class="string">&quot;YY&quot;</span></span>) &#123;</span><br><span class="line">    <span class="variable language_">document</span>.<span class="title function_">getElementById</span>(<span class="string">&quot;token&quot;</span>).<span class="property">value</span> = <span class="title function_">sha256</span>(e + <span class="variable language_">document</span>.<span class="title function_">getElementById</span>(<span class="string">&quot;token&quot;</span>).<span class="property">value</span>)</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">function</span> <span class="title function_">token_part_1</span>(<span class="params">a, b</span>) &#123;</span><br><span class="line">    <span class="variable language_">document</span>.<span class="title function_">getElementById</span>(<span class="string">&quot;token&quot;</span>).<span class="property">value</span> = <span class="title function_">do_something</span>(<span class="variable language_">document</span>.<span class="title function_">getElementById</span>(<span class="string">&quot;phrase&quot;</span>).<span class="property">value</span>)</span><br><span class="line">&#125;</span><br><span class="line"><span class="variable language_">document</span>.<span class="title function_">getElementById</span>(<span class="string">&quot;phrase&quot;</span>).<span class="property">value</span> = <span class="string">&quot;&quot;</span>;</span><br><span class="line"><span class="built_in">setTimeout</span>(<span class="keyword">function</span>(<span class="params"></span>) &#123;</span><br><span class="line">    <span class="title function_">token_part_2</span>(<span class="string">&quot;XX&quot;</span>)</span><br><span class="line">&#125;, <span class="number">300</span>);</span><br><span class="line"><span class="variable language_">document</span>.<span class="title function_">getElementById</span>(<span class="string">&quot;send&quot;</span>).<span class="title function_">addEventListener</span>(<span class="string">&quot;click&quot;</span>, token_part_3);</span><br><span class="line"><span class="title function_">token_part_1</span>(<span class="string">&quot;ABCD&quot;</span>, <span class="number">44</span>);</span><br></pre></td></tr></table></figure>
+<p>之所以提交后会出错就是因为单击事件执行的是<code>token_part_3</code>的函数，但是<code>token_part_1</code>也被执行了.<br />
+默认为<br />
+<strong>执行顺序：</strong></p>
+<ol>
+<li>document.getElementById(“phrase”).value = “”</li>
+</ol>
+<blockquote>
+<p>清空phrase内容</p>
+</blockquote>
+<ol start="2">
+<li>token_part_1(“ABCD”,44)</li>
+</ol>
+<blockquote>
+<p>直接在console定义do_something(e)这个函数，然后计算执行代码，此时token值为<code>sseccus</code></p>
+</blockquote>
+<ol start="3">
+<li>setTimeout…</li>
+</ol>
+<blockquote>
+<p>0.3s后执行taken_part_2(‘XX’),此时token内容为<code>&quot;7f1bfaaf829f785ba5801d5bf68c1ecaf95ce04545462c8b8f311dfc9014068a&quot;</code></p>
+</blockquote>
+<ol start="4">
+<li>最后执行点击事件</li>
+</ol>
+<blockquote>
+<p>执行了token_part_3,得到了token最后的值为<code>ec7ef8687050b6fe803867ea696734c67b541dfafb286a0b1239f42ac5b0aa84</code>，然后更改请求表单中token的值发送请求，Well Done！</p>
+</blockquote>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="/links/">Links</a></li>
+         
+          <li><a href="/about/">About</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#weak-session-ids"><span class="toc-number">1.</span> <span class="toc-text"> Weak Session IDs</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#low"><span class="toc-number">1.1.</span> <span class="toc-text"> Low</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#high"><span class="toc-number">1.2.</span> <span class="toc-text"> High</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#xssdom"><span class="toc-number">2.</span> <span class="toc-text"> XSS(DOM)</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#low-2"><span class="toc-number">2.1.</span> <span class="toc-text"> Low</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#high-2"><span class="toc-number">2.2.</span> <span class="toc-text"> High</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#xssreflect"><span class="toc-number">3.</span> <span class="toc-text"> XSS(Reflect)</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#low-3"><span class="toc-number">3.1.</span> <span class="toc-text"> Low</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#high-3"><span class="toc-number">3.2.</span> <span class="toc-text"> High</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#xssstored"><span class="toc-number">4.</span> <span class="toc-text"> XSS(Stored)</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#low-4"><span class="toc-number">4.1.</span> <span class="toc-text"> Low</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#high-4"><span class="toc-number">4.2.</span> <span class="toc-text"> High</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#content-security-policy-bypass"><span class="toc-number">5.</span> <span class="toc-text"> Content Security Policy Bypass</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#low-5"><span class="toc-number">5.1.</span> <span class="toc-text"> Low</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#high-5"><span class="toc-number">5.2.</span> <span class="toc-text"> High</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#javascript"><span class="toc-number">6.</span> <span class="toc-text"> JavaScript</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#low-6"><span class="toc-number">6.1.</span> <span class="toc-text"> Low</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#high-6"><span class="toc-number">6.2.</span> <span class="toc-text"> High</span></a></li></ol></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=http://example.com/2022/08/28/dvwa-section-b/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=http://example.com/2022/08/28/dvwa-section-b/&text=DVWA Lab Section B"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=http://example.com/2022/08/28/dvwa-section-b/&title=DVWA Lab Section B"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=http://example.com/2022/08/28/dvwa-section-b/&is_video=false&description=DVWA Lab Section B"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=DVWA Lab Section B&body=Check out this article: http://example.com/2022/08/28/dvwa-section-b/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=http://example.com/2022/08/28/dvwa-section-b/&title=DVWA Lab Section B"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=http://example.com/2022/08/28/dvwa-section-b/&title=DVWA Lab Section B"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=http://example.com/2022/08/28/dvwa-section-b/&title=DVWA Lab Section B"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=http://example.com/2022/08/28/dvwa-section-b/&title=DVWA Lab Section B"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=http://example.com/2022/08/28/dvwa-section-b/&name=DVWA Lab Section B&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=http://example.com/2022/08/28/dvwa-section-b/&t=DVWA Lab Section B"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2022-2023
+    Andy
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/search/">Search</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a href="/categories/">categories</a></li><!--
+     --><!--
+       --><li><a href="/links/">Links</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     -->
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+ 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script> 
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script> 
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="far fa-clone"></i>';
+    btn += '</span>'; 
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Umami Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+</body>
+</html>

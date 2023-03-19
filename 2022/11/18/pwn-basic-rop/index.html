@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="Parameter Transfer 123456789#include&lt;stdio.h&gt;void main() &amp;#123;	int a &#x3D; 1;	int b &#x3D; 2;	printf(&quot;sum: %d&quot;, sum(a, b));&amp;#125;int sum(int a, int b) &amp;#123;	return a + b;&amp;#125;  32-Bit  首先压入">
+<meta property="og:type" content="article">
+<meta property="og:title" content="PWN Basic ROP">
+<meta property="og:url" content="http://example.com/2022/11/18/pwn-basic-rop/index.html">
+<meta property="og:site_name" content="a0dy&#39;s Home">
+<meta property="og:description" content="Parameter Transfer 123456789#include&lt;stdio.h&gt;void main() &amp;#123;	int a &#x3D; 1;	int b &#x3D; 2;	printf(&quot;sum: %d&quot;, sum(a, b));&amp;#125;int sum(int a, int b) &amp;#123;	return a + b;&amp;#125;  32-Bit  首先压入">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2022-11-18T04:00:00.000Z">
+<meta property="article:modified_time" content="2023-03-19T09:40:34.666Z">
+<meta property="article:author" content="Andy">
+<meta property="article:tag" content="param transfer">
+<meta property="article:tag" content="ROP chain">
+<meta name="twitter:card" content="summary">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>PWN Basic ROP</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="Menu"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/search/">Search</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a href="/categories/">categories</a></li><!--
+     --><!--
+       --><li><a href="/links/">Links</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="Previous post" href="/2022/11/20/pwn-use/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="Next post" href="/2022/10/25/pwn-learn/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="Back to top" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="Share post" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=http://example.com/2022/11/18/pwn-basic-rop/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=http://example.com/2022/11/18/pwn-basic-rop/&text=PWN Basic ROP"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=http://example.com/2022/11/18/pwn-basic-rop/&title=PWN Basic ROP"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=http://example.com/2022/11/18/pwn-basic-rop/&is_video=false&description=PWN Basic ROP"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=PWN Basic ROP&body=Check out this article: http://example.com/2022/11/18/pwn-basic-rop/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=http://example.com/2022/11/18/pwn-basic-rop/&title=PWN Basic ROP"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=http://example.com/2022/11/18/pwn-basic-rop/&title=PWN Basic ROP"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=http://example.com/2022/11/18/pwn-basic-rop/&title=PWN Basic ROP"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=http://example.com/2022/11/18/pwn-basic-rop/&title=PWN Basic ROP"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=http://example.com/2022/11/18/pwn-basic-rop/&name=PWN Basic ROP&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=http://example.com/2022/11/18/pwn-basic-rop/&t=PWN Basic ROP"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#parameter-transfer"><span class="toc-number">1.</span> <span class="toc-text"> Parameter Transfer</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#32-bit"><span class="toc-number">1.1.</span> <span class="toc-text"> 32-Bit</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#64-bit"><span class="toc-number">1.2.</span> <span class="toc-text"> 64-Bit</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#rop"><span class="toc-number">2.</span> <span class="toc-text"> ROP</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#32-bit-2"><span class="toc-number">2.1.</span> <span class="toc-text"> 32 Bit</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#64-bit-2"><span class="toc-number">2.2.</span> <span class="toc-text"> 64 Bit</span></a></li></ol></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        PWN Basic ROP
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">Andy</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2022-11-18T04:00:00.000Z" itemprop="datePublished">2022-11-18</time>
+        
+      
+    </div>
+
+
+      
+    <div class="article-category">
+        <i class="fas fa-archive"></i>
+        <a class="category-link" href="/categories/PWN/">PWN</a>
+    </div>
+
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link-link" href="/tags/ROP-chain/" rel="tag">ROP chain</a>, <a class="tag-link-link" href="/tags/param-transfer/" rel="tag">param transfer</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h2 id="parameter-transfer"><a class="markdownIt-Anchor" href="#parameter-transfer"></a> Parameter Transfer</h2>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="type">void</span> <span class="title function_">main</span><span class="params">()</span> &#123;</span><br><span class="line">	<span class="type">int</span> a = <span class="number">1</span>;</span><br><span class="line">	<span class="type">int</span> b = <span class="number">2</span>;</span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">&quot;sum: %d&quot;</span>, sum(a, b));</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">int</span> <span class="title function_">sum</span><span class="params">(<span class="type">int</span> a, <span class="type">int</span> b)</span> &#123;</span><br><span class="line">	<span class="keyword">return</span> a + b;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="32-bit"><a class="markdownIt-Anchor" href="#32-bit"></a> 32-Bit</h3>
+<ol>
+<li>首先压入b的值</li>
+<li>然后压入a的值</li>
+<li><code>call sum</code>执行<code>push eip;jmp sum</code></li>
+</ol>
+<p>asm:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">0x0804841C    mov     [ebp+var_10], 1  # 此处变量赋值 a</span><br><span class="line">0x08048423    mov     [ebp+var_C], 2   # 此处变量赋值 b</span><br><span class="line">0x0804842A    sub     esp, 8</span><br><span class="line">0x0804842D    push    [ebp+var_C]  # 此处往栈中压入 b 的地址</span><br><span class="line">0x08048430    push    [ebp+var_10] # 此处往栈中压入 a 的地址</span><br></pre></td></tr></table></figure>
+<p>此时栈空间</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"># (sum next)</span><br><span class="line"># a</span><br><span class="line"># b</span><br></pre></td></tr></table></figure>
+<h3 id="64-bit"><a class="markdownIt-Anchor" href="#64-bit"></a> 64-Bit</h3>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">0x40052E    mov     [rbp+var_8], 1  # 变量 a 赋值</span><br><span class="line">0x400535    mov     [rbp+var_4], 2  # 变量 b 赋值</span><br><span class="line">0x40053C    mov     edx, [rbp+var_4]  # 变量 b 传参</span><br><span class="line">0x40053F    mov     eax, [rbp+var_8]  # 变量 a 传参</span><br><span class="line">0x400542    mov     esi, edx  # 变量 b 传参</span><br><span class="line">0x400544    mov     edi, eax  # 变量 a 传参</span><br></pre></td></tr></table></figure>
+<ol>
+<li>要知道64位程序参数传递顺序是<code>rdi rsi rdx rcx r8 r9</code></li>
+<li>由于知道程序的sum下一条指令是return，所以栈空间如下</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"># return address</span><br><span class="line"># a</span><br><span class="line"># b</span><br></pre></td></tr></table></figure>
+<ol start="3">
+<li>执行完毕后</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"># a</span><br><span class="line"># b</span><br></pre></td></tr></table></figure>
+<hr />
+<h2 id="rop"><a class="markdownIt-Anchor" href="#rop"></a> ROP</h2>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> __cdecl <span class="title function_">main</span><span class="params">()</span></span><br><span class="line">&#123;</span><br><span class="line">  init();</span><br><span class="line">  <span class="keyword">return</span> pwnme();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">pwnme</span><span class="params">()</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="type">char</span> buf; <span class="comment">// [esp+4h] [ebp-44h]</span></span><br><span class="line"></span><br><span class="line">  <span class="built_in">puts</span>(<span class="string">&quot;pwd : &quot;</span>);</span><br><span class="line">  read(<span class="number">0</span>, &amp;buf, <span class="number">0x100</span>u);</span><br><span class="line">  <span class="comment">// gets(&amp;buf); 64为程序中用的是gets</span></span><br><span class="line">  <span class="keyword">if</span> ( <span class="built_in">strcmp</span>(&amp;buf, <span class="string">&quot;1qazcde3&quot;</span>) )</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="built_in">puts</span>(<span class="string">&quot;NO FUNCTION&quot;</span>);</span><br><span class="line">    <span class="built_in">exit</span>(<span class="number">0</span>);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> <span class="built_in">puts</span>(<span class="string">&quot;DONE!&quot;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="32-bit-2"><a class="markdownIt-Anchor" href="#32-bit-2"></a> 32 Bit</h3>
+<ul>
+<li>payload构建:<code>p32(read_addr) + p32(system_addr) + p32(0) + p32(bss_addr) + p32(256)</code></li>
+</ul>
+<blockquote>
+<p>相当于执行了read(0,bss_addr,256)后返回到system，此时栈空间如下,这个时候就执行了<code>system('/bin/sh')</code></p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"># 0</span><br><span class="line"># bss_addr      此时已经写入/bin/sh字符串</span><br><span class="line"># 256   无用参数</span><br></pre></td></tr></table></figure>
+<ul>
+<li>万金油ORP构建:
+<ol>
+<li>ROPgadget找出寄存器pop地址
+<blockquote>
+<p>假设找到了<code>pop esi; pop edi; pop ebp; ret;</code></p>
+</blockquote>
+</li>
+<li>构建payload：<code>p32(read_addr)+p32(0)+p32(bss_addr)+p32(256)+p32(pop_addr)+p32(system_addr)+p32(0)+p32(bss_addr)</code></li>
+<li>上面执行完read后，pop清空寄存器，然后继续使用自定义参数</li>
+</ol>
+</li>
+</ul>
+<h3 id="64-bit-2"><a class="markdownIt-Anchor" href="#64-bit-2"></a> 64 Bit</h3>
+<ul>
+<li>payload构建：<code>p64(pop_rdi)+p64(bss_addr)+p64(gets_addr)+p64(pop_addr)+p64(bss_addr)+p64(system_addr)</code></li>
+<li>32位和64位构建payload的方式不同主要原因是一个是一个是靠栈压入参数，另一个是靠寄存器传递参数</li>
+</ul>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="/links/">Links</a></li>
+         
+          <li><a href="/about/">About</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#parameter-transfer"><span class="toc-number">1.</span> <span class="toc-text"> Parameter Transfer</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#32-bit"><span class="toc-number">1.1.</span> <span class="toc-text"> 32-Bit</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#64-bit"><span class="toc-number">1.2.</span> <span class="toc-text"> 64-Bit</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#rop"><span class="toc-number">2.</span> <span class="toc-text"> ROP</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#32-bit-2"><span class="toc-number">2.1.</span> <span class="toc-text"> 32 Bit</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#64-bit-2"><span class="toc-number">2.2.</span> <span class="toc-text"> 64 Bit</span></a></li></ol></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=http://example.com/2022/11/18/pwn-basic-rop/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=http://example.com/2022/11/18/pwn-basic-rop/&text=PWN Basic ROP"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=http://example.com/2022/11/18/pwn-basic-rop/&title=PWN Basic ROP"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=http://example.com/2022/11/18/pwn-basic-rop/&is_video=false&description=PWN Basic ROP"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=PWN Basic ROP&body=Check out this article: http://example.com/2022/11/18/pwn-basic-rop/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=http://example.com/2022/11/18/pwn-basic-rop/&title=PWN Basic ROP"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=http://example.com/2022/11/18/pwn-basic-rop/&title=PWN Basic ROP"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=http://example.com/2022/11/18/pwn-basic-rop/&title=PWN Basic ROP"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=http://example.com/2022/11/18/pwn-basic-rop/&title=PWN Basic ROP"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=http://example.com/2022/11/18/pwn-basic-rop/&name=PWN Basic ROP&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=http://example.com/2022/11/18/pwn-basic-rop/&t=PWN Basic ROP"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2022-2023
+    Andy
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/search/">Search</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a href="/categories/">categories</a></li><!--
+     --><!--
+       --><li><a href="/links/">Links</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     -->
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+ 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script> 
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script> 
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="far fa-clone"></i>';
+    btn += '</span>'; 
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Umami Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+</body>
+</html>

